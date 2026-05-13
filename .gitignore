@@ -1,0 +1,9 @@
+/vendor
+/.idea
+/.vscode
+/composer.lock
+.DS_Store
+PHPUnitXml.xml
+phpunit.xml
+.phpunit.result.cache
+.PUPUBLISHING.md

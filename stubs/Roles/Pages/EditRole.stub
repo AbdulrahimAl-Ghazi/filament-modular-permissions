@@ -1,0 +1,35 @@
+<?php
+
+namespace {{namespace}}\Pages;
+
+use {{namespace}}\RoleResource;
+use Filament\Actions;
+use Filament\Resources\Pages\EditRecord;
+
+class EditRole extends EditRecord
+{
+    protected static string $resource = RoleResource::class;
+
+    protected function getHeaderActions(): array
+    {
+        return [
+            Actions\DeleteAction::make(),
+        ];
+    }
+
+    protected function handleRecordUpdate(\Illuminate\Database\Eloquent\Model $record, array $data): \Illuminate\Database\Eloquent\Model
+    {
+        $permissions = [];
+        foreach ($data as $key => $value) {
+            if (str_starts_with($key, 'permissions_')) {
+                $permissions = array_merge($permissions, $value ?? []);
+                unset($data[$key]);
+            }
+        }
+
+        $record = parent::handleRecordUpdate($record, $data);
+        $record->syncPermissions($permissions);
+
+        return $record;
+    }
+}

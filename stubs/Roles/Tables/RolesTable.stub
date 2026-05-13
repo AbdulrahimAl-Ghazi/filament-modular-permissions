@@ -1,0 +1,42 @@
+<?php
+
+namespace {{namespace}}\Tables;
+
+use Filament\Tables\Actions\DeleteAction;
+use Filament\Tables\Actions\EditAction;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Table;
+
+class RolesTable
+{
+    public static function configure(Table $table): Table
+    {
+        return $table
+            ->columns([
+                TextColumn::make('name')
+                    ->searchable(),
+                TextColumn::make('guard_name')
+                    ->searchable(),
+                TextColumn::make('permissions_count')
+                    ->counts('permissions')
+                    ->label('Permissions'),
+                TextColumn::make('created_at')
+                    ->dateTime()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('updated_at')
+                    ->dateTime()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+            ])
+            ->filters([
+                //
+            ])
+            ->actions([
+                EditAction::make()
+                    ->hidden(fn ($record) => $record->name === 'super_admin'),
+                DeleteAction::make()
+                    ->hidden(fn ($record) => $record->name === 'super_admin'),
+            ]);
+    }
+}

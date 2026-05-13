@@ -1,0 +1,27 @@
+<?php
+
+namespace {{namespace}}\Pages;
+
+use {{namespace}}\RoleResource;
+use Filament\Resources\Pages\CreateRecord;
+
+class CreateRole extends CreateRecord
+{
+    protected static string $resource = RoleResource::class;
+
+    protected function handleRecordCreation(array $data): \Illuminate\Database\Eloquent\Model
+    {
+        $permissions = [];
+        foreach ($data as $key => $value) {
+            if (str_starts_with($key, 'permissions_')) {
+                $permissions = array_merge($permissions, $value ?? []);
+                unset($data[$key]);
+            }
+        }
+
+        $record = parent::handleRecordCreation($data);
+        $record->syncPermissions($permissions);
+
+        return $record;
+    }
+}
