@@ -1,0 +1,51 @@
+<?php
+
+namespace {{namespace}}\Schemas;
+
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Select;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
+use Illuminate\Support\Facades\Hash;
+use Filament\Facades\Filament;
+
+class UserForm
+{
+    public static function configure(Schema $schema): Schema
+    {
+        return $schema
+            ->components([
+                Section::make(__('filament-modular-permissions::permissions.user_form.account_section'))
+                    ->schema([
+                        TextInput::make('name')
+                            ->label(__('filament-modular-permissions::permissions.user_form.name'))
+                            ->required()
+                            ->maxLength(255),
+                        TextInput::make('email')
+                            ->label(__('filament-modular-permissions::permissions.user_form.email'))
+                            ->email()
+                            ->required()
+                            ->maxLength(255)
+                            ->unique(ignoreRecord: true),
+                        TextInput::make('password')
+                            ->label(__('filament-modular-permissions::permissions.user_form.password'))
+                            ->password()
+                            ->dehydrated(fn ($state) => filled($state))
+                            ->required(fn (string $operation): bool => $operation === 'create')
+                            ->maxLength(255),
+                    ])->columns(2),
+
+                Section::make(__('filament-modular-permissions::permissions.user_form.roles_section'))
+                    ->schema([
+                        Select::make('roles')
+                            ->label(__('filament-modular-permissions::permissions.user_form.roles'))
+                            ->multiple()
+                            ->relationship('roles', 'name', function ($query) {
+                                return $query->where('guard_name', Filament::getCurrentPanel()->getAuthGuard());
+                            })
+                            ->preload()
+                            ->searchable(),
+                    ]),
+            ]);
+    }
+}

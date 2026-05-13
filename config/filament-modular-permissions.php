@@ -9,9 +9,28 @@ return [
     | Here you can customize the generated RoleResource.
     |
     */
+    /*
+    |--------------------------------------------------------------------------
+    | Global Protection & Hiding
+    |--------------------------------------------------------------------------
+    |
+    | If enabled, the package will automatically hide resources and widgets
+    | from the navigation if the user doesn't have the required permission,
+    | without needing to add traits to every file.
+    |
+    */
+    'auto_hide_resources' => true,
+
     'role_resource' => [
         'navigation_group' => 'Settings',
         'navigation_icon' => 'heroicon-o-shield-check',
+        'navigation_label' => null,
+        'cluster' => null,
+    ],
+
+    'user_resource' => [
+        'navigation_group' => 'Settings',
+        'navigation_icon' => 'heroicon-o-users',
         'navigation_label' => null,
         'cluster' => null,
     ],

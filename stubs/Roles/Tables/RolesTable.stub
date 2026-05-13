@@ -2,8 +2,8 @@
 
 namespace {{namespace}}\Tables;
 
-use Filament\Tables\Actions\DeleteAction;
-use Filament\Tables\Actions\EditAction;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
@@ -14,20 +14,16 @@ class RolesTable
         return $table
             ->columns([
                 TextColumn::make('name')
+                    ->label(__('filament-modular-permissions::permissions.role_name'))
                     ->searchable(),
                 TextColumn::make('guard_name')
-                    ->searchable(),
+                    ->label(__('filament-modular-permissions::permissions.guard_name'))
+                    ->badge()
+                    ->color('info'),
                 TextColumn::make('permissions_count')
+                    ->label(__('filament-modular-permissions::permissions.permissions_count'))
                     ->counts('permissions')
-                    ->label('Permissions'),
-                TextColumn::make('created_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('updated_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->badge(),
             ])
             ->filters([
                 //

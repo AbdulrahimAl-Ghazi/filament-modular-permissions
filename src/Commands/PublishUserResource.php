@@ -9,14 +9,14 @@ use Illuminate\Console\Attributes\Signature;
 use Filament\Facades\Filament;
 use Illuminate\Support\Str;
 
-#[Description('Publish Filament Role Resource and schemas to a specific panel')]
-#[Signature('permissions:publish-resources {--panel= : The ID of the panel to publish to}')]
-class PublishRoleResources extends Command
+#[Description('Publish Filament User Resource for panel management')]
+#[Signature('permissions:publish-user-resource {--panel= : The ID of the panel to publish to}')]
+class PublishUserResource extends Command
 {
     public function handle()
     {
         $panelId = $this->option('panel');
-
+        
         // Interactive panel selection if not provided
         if (!$panelId) {
             $panels = array_keys(Filament::getPanels());
@@ -39,21 +39,21 @@ class PublishRoleResources extends Command
         }
 
         $panelName = Str::studly($panelId);
-        $namespace = "App\\Filament\\{$panelName}\\Resources\\Roles";
-        $resourcesPath = app_path("Filament/{$panelName}/Resources/Roles");
+        $namespace = "App\\Filament\\{$panelName}\\Resources\\Users";
+        $resourcesPath = app_path("Filament/{$panelName}/Resources/Users");
 
         // Default path if it's the main admin panel and follows standard convention
         if ($panelId === 'admin' && !File::exists(app_path('Filament/Admin'))) {
-            $namespace = 'App\\Filament\\Resources\\Roles';
-            $resourcesPath = app_path('Filament/Resources/Roles');
+            $namespace = 'App\\Filament\\Resources\\Users';
+            $resourcesPath = app_path('Filament/Resources/Users');
         }
-
-        $customStubPath = base_path('stubs/filament-modular-permissions/Roles');
-        $packageStubPath = __DIR__ . '/../../stubs/Roles';
+        
+        $customStubPath = base_path('stubs/filament-modular-permissions/Users');
+        $packageStubPath = __DIR__ . '/../../stubs/Users';
         
         $stubPath = File::exists($customStubPath) ? $customStubPath : $packageStubPath;
 
-        $this->info("Publishing Role Resources to: {$namespace}");
+        $this->info("Publishing User Resource to: {$namespace}");
 
         $this->createDirectoryIfNotExists($resourcesPath);
         $this->createDirectoryIfNotExists($resourcesPath . '/Pages');
@@ -62,20 +62,19 @@ class PublishRoleResources extends Command
 
         $vars = [
             'namespace' => $namespace,
-            'panel_id' => $panelId,
-            'guard' => $panel->getAuthGuard(),
-            'navigation_group' => config('filament-modular-permissions.role_resource.navigation_group', 'Settings'),
-            'navigation_icon' => config('filament-modular-permissions.role_resource.navigation_icon', 'heroicon-o-shield-check'),
+            'navigation_group' => config('filament-modular-permissions.user_resource.navigation_group', 'Settings'),
+            'navigation_icon' => config('filament-modular-permissions.user_resource.navigation_icon', 'heroicon-o-users'),
+            'navigation_label' => config('filament-modular-permissions.user_resource.navigation_label', 'Users'),
         ];
 
-        $this->publishFile($stubPath . '/RoleResource.stub', $resourcesPath . '/RoleResource.php', $vars);
-        $this->publishFile($stubPath . '/Pages/ListRoles.stub', $resourcesPath . '/Pages/ListRoles.php', $vars);
-        $this->publishFile($stubPath . '/Pages/CreateRole.stub', $resourcesPath . '/Pages/CreateRole.php', $vars);
-        $this->publishFile($stubPath . '/Pages/EditRole.stub', $resourcesPath . '/Pages/EditRole.php', $vars);
-        $this->publishFile($stubPath . '/Schemas/RoleForm.stub', $resourcesPath . '/Schemas/RoleForm.php', $vars);
-        $this->publishFile($stubPath . '/Tables/RolesTable.stub', $resourcesPath . '/Tables/RolesTable.php', $vars);
+        $this->publishFile($stubPath . '/UserResource.stub', $resourcesPath . '/UserResource.php', $vars);
+        $this->publishFile($stubPath . '/Pages/ListUsers.stub', $resourcesPath . '/Pages/ListUsers.php', $vars);
+        $this->publishFile($stubPath . '/Pages/CreateUser.stub', $resourcesPath . '/Pages/CreateUser.php', $vars);
+        $this->publishFile($stubPath . '/Pages/EditUser.stub', $resourcesPath . '/Pages/EditUser.php', $vars);
+        $this->publishFile($stubPath . '/Schemas/UserForm.stub', $resourcesPath . '/Schemas/UserForm.php', $vars);
+        $this->publishFile($stubPath . '/Tables/UsersTable.stub', $resourcesPath . '/Tables/UsersTable.php', $vars);
 
-        $this->info('Modular Role Resources have been published successfully.');
+        $this->info('Modular User Resource has been published successfully.');
     }
 
     protected function createDirectoryIfNotExists($path)

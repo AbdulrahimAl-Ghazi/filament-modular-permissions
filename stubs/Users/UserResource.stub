@@ -1,0 +1,58 @@
+<?php
+
+namespace {{namespace}};
+
+use {{namespace}}\Pages\CreateUser;
+use {{namespace}}\Pages\EditUser;
+use {{namespace}}\Pages\ListUsers;
+use {{namespace}}\Schemas\UserForm;
+use {{namespace}}\Tables\UsersTable;
+use App\Models\User;
+use Abdulrahim\FilamentModularPermissions\Traits\HandlesResourcePermissions;
+use Filament\Resources\Resource;
+use Filament\Schemas\Schema;
+use Filament\Tables\Table;
+
+class UserResource extends Resource
+{
+    use HandlesResourcePermissions;
+
+    protected static ?string $model = User::class;
+
+    protected static string | \BackedEnum | null $navigationIcon = '{{navigation_icon}}';
+
+    public static function getNavigationGroup(): ?string
+    {
+        return config('filament-modular-permissions.user_resource.navigation_group');
+    }
+
+    public static function getNavigationLabel(): string
+    {
+        return config('filament-modular-permissions.user_resource.navigation_label') 
+            ?? __('filament-modular-permissions::permissions.resources.user_resource');
+    }
+
+    public static function form(Schema $schema): Schema
+    {
+        return UserForm::configure($schema);
+    }
+
+    public static function table(Table $table): Table
+    {
+        return UsersTable::configure($table);
+    }
+
+    public static function getRelations(): array
+    {
+        return [];
+    }
+
+    public static function getPages(): array
+    {
+        return [
+            'index' => ListUsers::route('/'),
+            'create' => CreateUser::route('/create'),
+            'edit' => EditUser::route('/{record}/edit'),
+        ];
+    }
+}
