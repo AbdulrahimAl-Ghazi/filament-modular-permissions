@@ -35,42 +35,61 @@ composer require abdulrahim/filament-modular-permissions
 php artisan permissions:sync
 ```
 
+> [!IMPORTANT]
+> You **must** run `php artisan permissions:sync` whenever you add a new Resource or Widget to your Filament project to ensure its permissions are registered in the database.
+
 3. Publish Resources:
 
 ```bash
+# To manage Roles and Permissions
 php artisan permissions:publish-resources
+
+# To manage Users and assign Roles to them
 php artisan permissions:publish-user-resource
+```
+
+## Initial User (Seeding)
+
+To create your first Super Admin user, add this to your `DatabaseSeeder.php`:
+
+```php
+use App\Models\User;
+use Spatie\Permission\Models\Role;
+
+public function run(): void
+{
+    // Ensure the super_admin role exists for the web guard
+    Role::firstOrCreate(['name' => 'super_admin', 'guard_name' => 'web']);
+
+    $admin = User::firstOrCreate(
+        ['email' => 'admin@admin.com'],
+        [
+            'name' => 'Admin',
+            'password' => bcrypt('12345678'),
+        ]
+    );
+
+    $admin->assignRole('super_admin');
+}
 ```
 
 ## Advanced Concepts
 
 ### 1. Multi-Guard Architecture
-
-The package is built to handle multi-panel environments where each panel might use a different Auth Guard (e.g., `web` for Users, `admin` for Admins).
-
-- When syncing or publishing, the package automatically detects the panel's guard.
-- Permissions are created and checked specifically for the guard associated with the current panel, preventing permission conflicts between panels.
+The package handles multi-panel environments where each panel might use a different Auth Guard. It automatically detects and uses the correct guard for syncing and checking permissions.
 
 ### 2. Intelligent Super Admin
-
-The `super_admin` role is treated as a master role.
-
-- The package registers a global `Gate::before` check.
-- If a user has the `super_admin` role (for their specific guard), they bypass all permission checks and are granted full access automatically.
-- This works zero-config; you only need to create the role and assign it to a user.
+The `super_admin` role is a master role. The package registers a global `Gate::before` check that grants full access to anyone with this role (guard-aware).
 
 ## Manual Control (Optional)
 
-If you prefer to control each resource manually, disable the global shield in `config/filament-modular-permissions.php`:
+Disable the global shield in `config/filament-modular-permissions.php`:
+`'auto_hide_resources' => false,`
 
-```php
-'auto_hide_resources' => false,
-```
-
-Then, use the traits: `use HandlesResourcePermissions;` or `use HandlesWidgetPermissions;`
+Then use the traits manually:
+`use HandlesResourcePermissions;` or `use HandlesWidgetPermissions;`
 
 ## Contact
-
 Email: [abaad.dev8@gmail.com](mailto:abaad.dev8@gmail.com)  
 Website: [abaad.dev](https://abaad.dev)
 
@@ -102,45 +121,63 @@ composer require abdulrahim/filament-modular-permissions
 php artisan permissions:sync
 ```
 
+> [!IMPORTANT]
+> **يجب** عليك تنفيذ أمر `php artisan permissions:sync` في كل مرة تقوم فيها بإضافة مورد (Resource) أو ويدجت (Widget) جديد لمشروعك، لضمان تسجيل صلاحياته في قاعدة البيانات.
+
 3. نشر واجهات الإدارة:
 
 ```bash
+# لنشر واجهة إدارة الأدوار والصلاحيات (RoleResource)
 php artisan permissions:publish-resources
+
+# لنشر واجهة إدارة المستخدمين وربطهم بالأدوار (UserResource)
 php artisan permissions:publish-user-resource
+```
+
+## إنشاء المستخدم الأول (Seeding)
+
+لإنشاء أول مستخدم بصلاحيات المدير العام (Super Admin)، أضف الكود التالي في ملف `DatabaseSeeder.php`:
+
+```php
+use App\Models\User;
+use Spatie\Permission\Models\Role;
+
+public function run(): void
+{
+    // التأكد من وجود دور السوبر أدمن للحارس الافتراضي
+    Role::firstOrCreate(['name' => 'super_admin', 'guard_name' => 'web']);
+
+    $admin = User::firstOrCreate(
+        ['email' => 'admin@admin.com'],
+        [
+            'name' => 'Admin',
+            'password' => bcrypt('12345678'),
+        ]
+    );
+
+    $admin->assignRole('super_admin');
+}
 ```
 
 ## مفاهيم متقدمة
 
 ### 1. معمارية الحراس المتعددة (Multi-Guard)
-
-تم تصميم المكتبة لتتعامل مع بيئات اللوحات المتعددة حيث قد تستخدم كل لوحة حارس أمان مختلف (مثل `web` للمستخدمين و `admin` للمدراء).
-
-- عند المزامنة أو النشر، تكتشف المكتبة تلقائياً الحارس (Guard) الخاص باللوحة.
-- يتم إنشاء وفحص الصلاحيات بناءً على الحارس المرتبط باللوحة الحالية، مما يمنع تداخل الصلاحيات بين اللوحات المختلفة.
+تتعامل المكتبة بذكاء مع اللوحات التي تستخدم حراس أمان مختلفة، وتفصل بين صلاحيات كل حارس تلقائياً.
 
 ### 2. السوبر أدمن الذكي (Intelligent Super Admin)
-
-يتم التعامل مع دور `super_admin` كدور رئيسي (Master Role).
-
-- تقوم المكتبة بتسجيل فحص `Gate::before` عالمي.
-- إذا كان المستخدم يملك دور `super_admin` (المرتبط بالحارس الخاص به)، فإنه يتجاوز جميع فحوصات الصلاحيات ويمنح وصولاً كاملاً تلقائياً.
-- يعمل هذا النظام بدون أي إعدادات إضافية؛ فقط قم بإنشاء الدور واسنده للمستخدم.
+بمجرد إعطاء دور `super_admin` للمستخدم، فإنه سيحصل على وصول كامل لكافة الأقسام تلقائياً عبر نظام `Gate::before`.
 
 ## التحكم اليدوي (اختياري)
 
-إذا كنت تفضل التحكم في كل مورد بشكل يدوي، قم بتعطيل الحماية الشاملة في ملف `config/filament-modular-permissions.php`:
+قم بتعطيل الحماية الشاملة في ملف الإعدادات:
+`'auto_hide_resources' => false,`
 
-```php
-'auto_hide_resources' => false,
-```
-
-ثم استخدم الـ Traits يدوياً: `use HandlesResourcePermissions;` أو `use HandlesWidgetPermissions;`
+ثم استخدم الـ Traits يدوياً:
+`use HandlesResourcePermissions;` أو `use HandlesWidgetPermissions;`
 
 ## التواصل
-
 البريد الإلكتروني: [abaad.dev8@gmail.com](mailto:abaad.dev8@gmail.com)  
 الموقع الإلكتروني: [abaad.dev](https://abaad.dev)
 
 ## License
-
 MIT License.
