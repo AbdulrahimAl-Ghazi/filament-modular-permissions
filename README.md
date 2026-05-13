@@ -24,16 +24,19 @@ A professional Laravel package for modular roles and permissions in Filament V3.
 ## Installation
 
 1. Install the package via composer:
+
 ```bash
 composer require abdulrahim/filament-modular-permissions
 ```
 
 2. Sync initial permissions:
+
 ```bash
 php artisan permissions:sync
 ```
 
 3. Publish the Roles resource:
+
 ```bash
 php artisan permissions:publish-resources
 ```
@@ -41,6 +44,7 @@ php artisan permissions:publish-resources
 ## Activation
 
 ### Option 1: Global Shield (Recommended)
+
 Add the middleware to your `PanelProvider` to protect all resources automatically:
 
 ```php
@@ -55,7 +59,9 @@ public function panel(Panel $panel): Panel
 ```
 
 ### Option 2: Manual Trait (Fine-grained)
+
 Add the trait to your Resource class:
+
 ```php
 use Abdulrahim\FilamentModularPermissions\Traits\HandlesResourcePermissions;
 
@@ -66,6 +72,7 @@ class UserResource extends Resource
 ```
 
 ## Contact
+
 Email: [abaad.dev8@gmail.com](mailto:abaad.dev8@gmail.com)  
 Website: [abaad.dev](https://abaad.dev)
 
@@ -86,16 +93,19 @@ Website: [abaad.dev](https://abaad.dev)
 ## التثبيت
 
 1. تحميل المكتبة:
+
 ```bash
 composer require abdulrahim/filament-modular-permissions
 ```
 
 2. مزامنة الصلاحيات:
+
 ```bash
 php artisan permissions:sync
 ```
 
 3. نشر واجهة الإدارة:
+
 ```bash
 php artisan permissions:publish-resources
 ```
@@ -103,6 +113,7 @@ php artisan permissions:publish-resources
 ## تفعيل الحماية
 
 ### الطريقة الأولى: الحماية الشاملة (الموصى بها)
+
 أضف الوسيط التالي في ملف الـ `PanelProvider`:
 
 ```php
@@ -117,8 +128,10 @@ public function panel(Panel $panel): Panel
 ```
 
 ## التواصل
+
 البريد الإلكتروني: [abaad.dev8@gmail.com](mailto:abaad.dev8@gmail.com)  
 الموقع الإلكتروني: [abaad.dev](https://abaad.dev)
 
 ## License
+
 MIT License.
