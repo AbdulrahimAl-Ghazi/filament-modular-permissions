@@ -4,7 +4,7 @@
 [![Total Downloads](https://img.shields.io/packagist/dt/abdulrahim/filament-modular-permissions.svg?style=flat-square)](https://packagist.org/packages/abdulrahim/filament-modular-permissions)
 [![License](https://img.shields.io/packagist/l/abdulrahim/filament-modular-permissions.svg?style=flat-square)](https://packagist.org/packages/abdulrahim/filament-modular-permissions)
 
-A professional Laravel package for modular roles and permissions in Filament V3. Supporting multi-panel, auto-syncing, and **Global Zero-Config Protection**.
+A professional Laravel package for modular roles and permissions in Filament. Supporting multi-panel, auto-syncing, and **Global Zero-Config Protection**.
 
 ---
 
@@ -97,7 +97,7 @@ Website: [abaad.dev](https://abaad.dev)
 
 # نظام الصلاحيات والأدوار الموديولر لـ Filament
 
-مكتبة احترافية لإدارة الأدوار والصلاحيات في Filament V3 تعتمد على المبدأ الموديولر، مع دعم كامل لتعدد لوحات التحكم والحماية الشاملة التلقائية.
+مكتبة احترافية لإدارة الأدوار والصلاحيات في Filament تعتمد على المبدأ الموديولر، مع دعم كامل لتعدد لوحات التحكم والحماية الشاملة التلقائية.
 
 ## المميزات الرئيسية
 
