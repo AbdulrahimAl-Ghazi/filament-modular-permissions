@@ -23,8 +23,14 @@ class FilamentModularPermissionsServiceProvider extends ServiceProvider
         Gate::before(function ($user, $ability, $args) {
             // 1. Super Admin Always Allowed
             $roleName = config('filament-modular-permissions.super_admin_role_name', 'super_admin');
-            if ($user->hasRole($roleName)) {
-                return true;
+            
+            try {
+                if ($user->hasRole($roleName)) {
+                    return true;
+                }
+            } catch (\Throwable $e) {
+                // If role check fails (e.g. Spatie tables missing), let it pass to other policies
+                return null;
             }
 
             // 2. Global Auto-Hiding Logic (for Resources & Navigation)
@@ -52,10 +58,13 @@ class FilamentModularPermissionsServiceProvider extends ServiceProvider
                         $modelName = Str::snake(class_basename($args[0]));
                         $permission = "{$abilityMap[$ability]}_{$modelName}";
 
-                        // Return true to allow, or null to let other policies decide.
-                        // Never return false here — that would block all other policies.
-                        if ($user->hasPermissionTo($permission)) {
-                            return true;
+                        try {
+                            if ($user->hasPermissionTo($permission)) {
+                                return true;
+                            }
+                        } catch (\Throwable $e) {
+                            // Permission doesn't exist in DB, handle gracefully
+                            return null;
                         }
 
                         return null;
@@ -64,8 +73,12 @@ class FilamentModularPermissionsServiceProvider extends ServiceProvider
 
                 // Check if it's a widget authorization (Custom Permission Check)
                 if (str_starts_with($ability, 'view_') && str_ends_with($ability, '_widget')) {
-                    if ($user->hasPermissionTo($ability)) {
-                        return true;
+                    try {
+                        if ($user->hasPermissionTo($ability)) {
+                            return true;
+                        }
+                    } catch (\Throwable $e) {
+                        return null;
                     }
 
                     return null;

@@ -48,7 +48,8 @@ class SyncPanelPermissions extends Command
             // ── Resources ────────────────────────────────────────────────
             $resourceCount = 0;
             foreach ($resources as $resource) {
-                $snakeName = Str::snake(class_basename($resource));
+                $resourceName = str_replace('Resource', '', class_basename($resource));
+                $snakeName = Str::snake($resourceName);
                 foreach ($actions as $action) {
                     Permission::firstOrCreate(['name' => "{$action}_{$snakeName}", 'guard_name' => $guard]);
                     $resourceCount++;
