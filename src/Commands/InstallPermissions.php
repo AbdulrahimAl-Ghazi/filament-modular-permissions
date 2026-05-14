@@ -21,27 +21,27 @@ class InstallPermissions extends Command
             '--force' => $this->option('force') ?: null,
         ]);
 
-        // ── Step 1: Sync ────────────────────────────────────────────────
+        // ── Step 1: Role Resources ───────────────────────────────────────
         $this->components->task(
-            '<fg=cyan>Step 1/3</> Syncing permissions from all Filament panels',
-            fn () => $this->callSilently('permissions:sync') === 0
-        );
-
-        // ── Step 2: Role Resources ───────────────────────────────────────
-        $this->components->task(
-            '<fg=cyan>Step 2/3</> Publishing Role Management Resource',
+            '<fg=cyan>Step 1/3</> Publishing Role Management Resource',
             fn () => $this->callSilently('permissions:publish-resources', $publishArgs) === 0
         );
 
-        // ── Step 3: User Resource ────────────────────────────────────────
+        // ── Step 2: User Resource ────────────────────────────────────────
         if (! $this->option('skip-user')) {
             $this->components->task(
-                '<fg=cyan>Step 3/3</> Publishing User Management Resource',
+                '<fg=cyan>Step 2/3</> Publishing User Management Resource',
                 fn () => $this->callSilently('permissions:publish-user-resource', $publishArgs) === 0
             );
         } else {
-            $this->components->warn('Step 3/3 skipped — User Resource not published (--skip-user).');
+            $this->components->warn('Step 2/3 skipped — User Resource not published (--skip-user).');
         }
+
+        // ── Step 3: Sync ────────────────────────────────────────────────
+        $this->components->task(
+            '<fg=cyan>Step 3/3</> Syncing all permissions (including newly published resources)',
+            fn () => $this->callSilently('permissions:sync') === 0
+        );
 
         $this->newLine();
         $this->components->info('Installation complete!');
