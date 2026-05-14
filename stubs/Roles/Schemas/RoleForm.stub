@@ -33,48 +33,36 @@ class RoleForm
 
         foreach ($groupedPermissions as $resourceName => $perms) {
             if ($resourceName === 'dashboard_widgets') {
-                $translatedResource = __('filament-modular-permissions::permissions.widgets.dashboard_widgets_label');
+                $translatedResource = static::translateWidget($resourceName);
                 $options = [];
                 foreach ($perms as $perm) {
                     $widgetName = str_replace('view_', '', $perm->name);
-                    $options[$perm->name] = __('filament-modular-permissions::permissions.widgets.' . $widgetName);
-                    
-                    if ($options[$perm->name] === 'filament-modular-permissions::permissions.widgets.' . $widgetName) {
-                        $options[$perm->name] = config('filament-modular-permissions.translations.widgets.' . $widgetName, Str::title(str_replace('_', ' ', $widgetName)));
+                    $translated = __('filament-modular-permissions::permissions.widgets.' . $widgetName);
+
+                    if ($translated === 'filament-modular-permissions::permissions.widgets.' . $widgetName) {
+                        $translated = config(
+                            'filament-modular-permissions.translations.widgets.' . $widgetName,
+                            Str::title(str_replace('_', ' ', $widgetName))
+                        );
                     }
+
+                    $options[$perm->name] = $translated;
                 }
             } else {
-                $translatedResource = __('filament-modular-permissions::permissions.resources.' . $resourceName);
-                
-                if ($translatedResource === 'filament-modular-permissions::permissions.resources.' . $resourceName) {
-                    $translatedResource = config('filament-modular-permissions.translations.resources.' . $resourceName);
-                }
-
-                if ($translatedResource === null || $translatedResource === 'filament-modular-permissions::permissions.resources.' . $resourceName) {
-                    $resourcePart = Str::studly(str_replace('_resource', '', $resourceName));
-                    $resourceClass = "App\\Filament\\Resources\\{$resourcePart}\\{$resourcePart}Resource";
-                    
-                    if (!class_exists($resourceClass)) {
-                        $resourcePartPlural = Str::plural($resourcePart);
-                        $resourceClass = "App\\Filament\\Resources\\{$resourcePartPlural}\\{$resourcePart}Resource";
-                    }
-
-                    if (class_exists($resourceClass)) {
-                        $translatedResource = $resourceClass::getNavigationLabel();
-                    }
-                }
-
-                $translatedResource ??= Str::title(str_replace('_', ' ', $resourceName));
+                $translatedResource = static::resolveResourceLabel($resourceName);
 
                 $options = [];
                 foreach ($perms as $perm) {
                     $action = str_replace("_{$resourceName}", '', $perm->name);
                     $translatedAction = __('filament-modular-permissions::permissions.actions.' . $action);
-                    
+
                     if ($translatedAction === 'filament-modular-permissions::permissions.actions.' . $action) {
-                        $translatedAction = config('filament-modular-permissions.translations.actions.' . $action, $action);
+                        $translatedAction = config(
+                            'filament-modular-permissions.translations.actions.' . $action,
+                            $action
+                        );
                     }
-                    
+
                     $options[$perm->name] = $translatedAction;
                 }
             }
@@ -126,5 +114,64 @@ class RoleForm
                         Grid::make(['default' => 1, 'md' => 2, 'xl' => 3])->schema($sections)
                     ]),
             ]);
+    }
+
+    /**
+     * Resolve a human-readable label for a resource permission group.
+     *
+     * Resolution priority:
+     *   1. Package lang file (filament-modular-permissions::permissions.resources.<key>)
+     *   2. App config override (filament-modular-permissions.translations.resources.<key>)
+     *   3. Active Filament Resource class getNavigationLabel() — searched across ALL registered panels
+     *   4. Fallback: title-cased version of the permission key
+     */
+    protected static function resolveResourceLabel(string $resourceName): string
+    {
+        // 1. Try lang file
+        $translated = __('filament-modular-permissions::permissions.resources.' . $resourceName);
+        if ($translated !== 'filament-modular-permissions::permissions.resources.' . $resourceName) {
+            return $translated;
+        }
+
+        // 2. Try config override
+        $configOverride = config('filament-modular-permissions.translations.resources.' . $resourceName);
+        if ($configOverride !== null) {
+            return $configOverride;
+        }
+
+        // 3. Search across all registered Filament panel resources
+        foreach (Filament::getPanels() as $panel) {
+            foreach ($panel->getResources() as $resourceClass) {
+                $snakeClass = Str::snake(class_basename($resourceClass));
+                if ($snakeClass === $resourceName) {
+                    try {
+                        return $resourceClass::getNavigationLabel();
+                    } catch (\Throwable) {
+                        // Silently skip if the resource throws during static call
+                    }
+                }
+            }
+        }
+
+        // 4. Title-case fallback
+        return Str::title(str_replace('_', ' ', $resourceName));
+    }
+
+    /**
+     * Resolve label for the widget group section.
+     */
+    protected static function translateWidget(string $groupKey): string
+    {
+        $override = config('filament-modular-permissions.translations.widgets.dashboard_widgets_label');
+        if ($override) {
+            return $override;
+        }
+
+        $translated = __('filament-modular-permissions::permissions.widgets.dashboard_widgets_label');
+        if ($translated !== 'filament-modular-permissions::permissions.widgets.dashboard_widgets_label') {
+            return $translated;
+        }
+
+        return 'Dashboard Widgets';
     }
 }

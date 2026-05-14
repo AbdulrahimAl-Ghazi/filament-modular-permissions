@@ -6,6 +6,8 @@ use Illuminate\Support\ServiceProvider;
 use Abdulrahim\FilamentModularPermissions\Commands\PublishRoleResources;
 use Abdulrahim\FilamentModularPermissions\Commands\PublishUserResource;
 use Abdulrahim\FilamentModularPermissions\Commands\SyncPanelPermissions;
+use Abdulrahim\FilamentModularPermissions\Commands\InstallPermissions;
+use Abdulrahim\FilamentModularPermissions\Commands\CheckUserPermissions;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Str;
 use Filament\Facades\Filament;
@@ -49,14 +51,24 @@ class FilamentModularPermissionsServiceProvider extends ServiceProvider
                     if (is_subclass_of($args[0], 'Illuminate\Database\Eloquent\Model')) {
                         $modelName = Str::snake(class_basename($args[0]));
                         $permission = "{$abilityMap[$ability]}_{$modelName}";
-                        
-                        return $user->hasPermissionTo($permission) ? true : false;
+
+                        // Return true to allow, or null to let other policies decide.
+                        // Never return false here — that would block all other policies.
+                        if ($user->hasPermissionTo($permission)) {
+                            return true;
+                        }
+
+                        return null;
                     }
                 }
 
                 // Check if it's a widget authorization (Custom Permission Check)
                 if (str_starts_with($ability, 'view_') && str_ends_with($ability, '_widget')) {
-                    return $user->hasPermissionTo($ability) ? true : false;
+                    if ($user->hasPermissionTo($ability)) {
+                        return true;
+                    }
+
+                    return null;
                 }
             }
 
@@ -68,6 +80,8 @@ class FilamentModularPermissionsServiceProvider extends ServiceProvider
                 PublishRoleResources::class,
                 PublishUserResource::class,
                 SyncPanelPermissions::class,
+                InstallPermissions::class,
+                CheckUserPermissions::class,
             ]);
 
             // Publishing config

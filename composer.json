@@ -1,6 +1,6 @@
 {
     "name": "abdulrahim/filament-modular-permissions",
-    "description": "Modular Roles and Permissions for Filament with easy publishing and syncing.",
+    "description": "Modular Roles and Permissions for Filament v5 with easy publishing and syncing.",
     "homepage": "https://abaad.dev",
     "type": "library",
     "license": "MIT",
@@ -11,8 +11,8 @@
         }
     ],
     "require": {
-        "php": "^8.1",
-        "filament/filament": "^3.0|^4.0|^5.0",
+        "php": "^8.2",
+        "filament/filament": "^5.0",
         "spatie/laravel-permission": "^6.0|^7.0"
     },
     "autoload": {

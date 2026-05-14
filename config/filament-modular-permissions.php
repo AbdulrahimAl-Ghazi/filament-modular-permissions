@@ -67,6 +67,25 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Custom Permissions
+    |--------------------------------------------------------------------------
+    |
+    | Define any additional custom permissions that should be created during
+    | the `permissions:sync` command. These are standalone permissions not
+    | tied to a specific resource, e.g. 'export_reports', 'access_api'.
+    |
+    | Format: ['permission_name', ...]
+    | The guard will be automatically determined per panel.
+    |
+    */
+    'custom_permissions' => [
+        // 'export_reports',
+        // 'access_api',
+        // 'view_dashboard',
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Custom Translations (Quick Overrides)
     |--------------------------------------------------------------------------
     |
