@@ -8,14 +8,12 @@ use {{namespace}}\Pages\ListUsers;
 use {{namespace}}\Schemas\UserForm;
 use {{namespace}}\Tables\UsersTable;
 use App\Models\User;
-use Abdulrahim\FilamentModularPermissions\Traits\HandlesResourcePermissions;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
 
 class UserResource extends Resource
 {
-    use HandlesResourcePermissions;
 
     protected static ?string $model = User::class;
 

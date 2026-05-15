@@ -8,7 +8,6 @@ use {{namespace}}\Pages\ListRoles;
 use {{namespace}}\Schemas\RoleForm;
 use {{namespace}}\Tables\RolesTable;
 use Spatie\Permission\Models\Role;
-use Abdulrahim\FilamentModularPermissions\Traits\HandlesResourcePermissions;
 use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
@@ -19,7 +18,6 @@ use Illuminate\Database\Eloquent\Builder;
 
 class RoleResource extends Resource
 {
-    use HandlesResourcePermissions;
 
     protected static ?string $model = Role::class;
 
