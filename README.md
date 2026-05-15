@@ -6,12 +6,32 @@
 
 A professional Laravel package for modular roles and permissions in **Filament v5**. Supporting multi-panel, auto-syncing, and **Global Zero-Config Protection**.
 
-> **Latest Stable Version**: v1.3.1
+> **Latest Stable Version**: v1.5.0
 > **Requirements**: PHP 8.2+, Laravel 11+, Filament 5.x, spatie/laravel-permission ^6|^7
 
 ---
 
-[العربية](#نظام-الصلاحيات-والأدوار-الموديولر-لـ-filament) | [English](#features)
+[English Documentation](#english-documentation) | [التوثيق العربي](#التوثيق-العربي)
+
+---
+
+<a name="english-documentation"></a>
+# English Documentation
+
+## Table of Contents
+- [Features](#features)
+- [Installation](#installation)
+- [Initial User (Seeding)](#initial-user-seeding)
+- [Configuration](#configuration)
+  - [Custom Permissions](#custom-permissions)
+  - [Excluding Panels](#excluding-panels)
+- [Advanced Features](#advanced-features)
+  - [Widget Auto-Protection](#widget-auto-protection)
+  - [Diagnostics](#diagnostics)
+  - [Advanced Concepts](#advanced-concepts)
+- [Manual Control](#manual-control)
+- [Available Commands](#available-commands)
+- [Contact](#contact)
 
 ---
 
@@ -37,13 +57,28 @@ A professional Laravel package for modular roles and permissions in **Filament v
 composer require abdulrahim/filament-modular-permissions
 ```
 
-**Step 2** — Run the installer:
+**Step 2** — Register the plugin in your Panel Provider:
+
+```php
+use Abdulrahim\FilamentModularPermissions\FilamentModularPermissionsPlugin;
+
+public function panel(Panel $panel): Panel
+{
+    return $panel
+        ->plugins([
+            FilamentModularPermissionsPlugin::make(),
+        ]);
+}
+```
+
+**Step 3** — Run the installer:
 
 ```bash
 php artisan permissions:install
 ```
 
 This command does three things automatically:
+
 1. Publishes the **Role Management** Resource
 2. Publishes the **User Management** Resource
 3. Syncs all permissions from your Filament panels to the database
@@ -51,6 +86,7 @@ This command does three things automatically:
 Then register both published resources in your Filament panel.
 
 > Or run each step individually if you need more control:
+>
 > ```bash
 > php artisan permissions:publish-resources      # Step 1: publish Role Resource
 > php artisan permissions:publish-user-resource  # Step 2: publish User Resource
@@ -62,10 +98,10 @@ Then register both published resources in your Filament panel.
 
 > [!TIP]
 > To publish to a specific panel, or to re-publish and overwrite existing files:
+>
 > ```bash
 > php artisan permissions:install --panel=admin --force
 > ```
-
 
 ## Initial User (Seeding)
 
@@ -91,7 +127,9 @@ public function run(): void
 }
 ```
 
-## Custom Permissions
+## Configuration
+
+### Custom Permissions
 
 To add standalone permissions not tied to any resource, define them in your config:
 
@@ -106,7 +144,7 @@ To add standalone permissions not tied to any resource, define them in your conf
 
 Then run `php artisan permissions:sync` to register them.
 
-## Excluding Panels from Sync
+### Excluding Panels from Sync
 
 Exclude specific panels from automatic syncing — useful for API panels, customer portals, or any panel that manages its own permissions separately:
 
@@ -131,7 +169,9 @@ php artisan permissions:sync --panel=api
 php artisan permissions:install --panel=api
 ```
 
-## Widget Auto-Protection
+## Advanced Features
+
+### Widget Auto-Protection
 
 Widgets are automatically hidden from users who don't have the required permission — **no trait needed on any widget class**.
 
@@ -144,7 +184,7 @@ In the Role form, widget permissions are displayed in a **dedicated section** be
 > [!NOTE]
 > If you set `auto_hide_resources => false` in config, widget auto-protection is also disabled. You can then use the `HandlesWidgetPermissions` trait manually on each widget.
 
-## Diagnostics
+### Diagnostics
 
 Inspect a user's roles and effective permissions:
 
@@ -153,21 +193,21 @@ php artisan permissions:check --user=1
 php artisan permissions:check --user=1 --guard=admin
 ```
 
-## Advanced Concepts
+### Advanced Concepts
 
-### 1. Multi-Guard Architecture
+#### 1. Multi-Guard Architecture
 The package handles multi-panel environments where each panel uses a different Auth Guard. Permissions are always isolated per guard.
 
-### 2. Intelligent Super Admin
+#### 2. Intelligent Super Admin
 The `super_admin` role is granted full access via a global `Gate::before` check. This hook returns `null` (not `false`) when denying, so your own Policies always remain active.
 
-### 3. Policy Compatibility
+#### 3. Policy Compatibility
 The `Gate::before` hook only intercepts known Filament abilities (`viewAny`, `view`, `create`, `update`, `delete`, etc.) on Eloquent models. All other policy checks are unaffected.
 
-### 4. Model Instance Support
+#### 4. Model Instance Support
 The gate check handles both class strings (used by `viewAny`/`create`) and model instances (used by `update`/`delete`/`restore`), ensuring all permission types are enforced correctly across all actions.
 
-## Manual Control (Optional)
+## Manual Control
 
 Disable the global shield in `config/filament-modular-permissions.php`:
 
@@ -185,7 +225,7 @@ use Abdulrahim\FilamentModularPermissions\Traits\HandlesWidgetPermissions;
 ## Available Commands
 
 | Command | Description |
-|---------|-------------|
+| :--- | :--- |
 | `permissions:install [--panel=] [--force] [--skip-user]` | All-in-one installer (publish + sync) |
 | `permissions:sync [--panel=]` | Sync permissions (skips excluded panels unless `--panel` is set) |
 | `permissions:publish-resources [--panel=] [--force]` | Publish Role Resource files |
@@ -195,17 +235,33 @@ use Abdulrahim\FilamentModularPermissions\Traits\HandlesWidgetPermissions;
 | `permissions:check [--user=] [--guard=]` | Diagnose user roles and permissions |
 
 ## Contact
+
 Email: [info@abaad.dev](mailto:info@abaad.dev)  
 Website: [abaad.dev](https://abaad.dev)
 
 ---
 
-# نظام الصلاحيات والأدوار الموديولر لـ Filament
+<a name="التوثيق-العربي"></a>
+# التوثيق العربي
 
-مكتبة احترافية لإدارة الأدوار والصلاحيات في **Filament v5** تعتمد على المبدأ الموديولر، مع دعم كامل لتعدد لوحات التحكم والحماية الشاملة التلقائية.
-
-> **الإصدار المستقر الأخير**: v1.3.1
+> **آخر إصدار مستقر**: v1.5.0
 > **المتطلبات**: PHP 8.2+، Laravel 11+، Filament 5.x، spatie/laravel-permission ^6|^7
+
+## فهرس المحتويات
+- [المميزات الرئيسية](#المميزات-الرئيسية)
+- [التثبيت](#التثبيت-1)
+- [إنشاء المستخدم الأول](#إنشاء-المستخدم-الأول)
+- [الإعدادات](#الإعدادات-1)
+  - [الصلاحيات المخصصة](#الصلاحيات-المخصصة-1)
+  - [استثناء اللوحات](#استثناء-اللوحات)
+- [المميزات المتقدمة](#المميزات-المتقدمة-1)
+  - [الحماية التلقائية للويدجت](#الحماية-التلقائية-للويدجت-1)
+  - [تشخيص الأذونات](#تشخيص-الأذونات-1)
+- [التحكم اليدوي](#التحكم-اليدوي-1)
+- [الأوامر المتاحة](#الأوامر-المتاحة-1)
+- [التواصل](#التواصل-1)
+
+---
 
 ## المميزات الرئيسية
 
@@ -228,13 +284,28 @@ Website: [abaad.dev](https://abaad.dev)
 composer require abdulrahim/filament-modular-permissions
 ```
 
-**الخطوة الثانية** — تشغيل المثبت:
+**الخطوة الثانية** — تسجيل الإضافة في مسببات اللوحة (Panel Provider):
+
+```php
+use Abdulrahim\FilamentModularPermissions\FilamentModularPermissionsPlugin;
+
+public function panel(Panel $panel): Panel
+{
+    return $panel
+        ->plugins([
+            FilamentModularPermissionsPlugin::make(),
+        ]);
+}
+```
+
+**الخطوة الثالثة** — تشغيل المثبت:
 
 ```bash
 php artisan permissions:install
 ```
 
 يقوم هذا الأمر بثلاثة أشياء تلقائياً:
+
 1. نشر **واجهة إدارة الأدوار**
 2. نشر **واجهة إدارة المستخدمين**
 3. مزامنة جميع الصلاحيات من لوحات Filament إلى قاعدة البيانات
@@ -242,6 +313,7 @@ php artisan permissions:install
 بعد ذلك، سجّل الـ Resources المنشورة في لوحة Filament الخاصة بك.
 
 > أو نفّذ كل خطوة بشكل منفرد:
+>
 > ```bash
 > php artisan permissions:publish-resources      # الخطوة 1: نشر واجهة الأدوار
 > php artisan permissions:publish-user-resource  # الخطوة 2: نشر واجهة المستخدمين
@@ -253,22 +325,34 @@ php artisan permissions:install
 
 > [!TIP]
 > للنشر على لوحة محددة أو لإعادة النشر فوق الملفات الموجودة:
+>
 > ```bash
 > php artisan permissions:install --panel=admin --force
 > ```
 
 ## إنشاء المستخدم الأول
 
+لإنشاء مستخدم "سوبر أدمن" أول، أضف الكود التالي لملف `DatabaseSeeder.php`:
+
 ```php
+use App\Models\User;
+use Spatie\Permission\Models\Role;
+
 Role::firstOrCreate(['name' => 'super_admin', 'guard_name' => 'web']);
+
 $admin = User::firstOrCreate(['email' => 'admin@admin.com'], [
     'name' => 'Admin',
     'password' => bcrypt('12345678'),
 ]);
+
 $admin->assignRole('super_admin');
 ```
 
-## الصلاحيات المخصصة
+## الإعدادات
+
+### الصلاحيات المخصصة
+
+لإضافة صلاحيات مستقلة غير مرتبطة بمورد معين، قم بتعريفها في ملف الإعدادات:
 
 ```php
 // config/filament-modular-permissions.php
@@ -280,7 +364,7 @@ $admin->assignRole('super_admin');
 
 ثم شغّل: `php artisan permissions:sync`
 
-## استثناء اللوحات من المزامنة
+### استثناء اللوحات
 
 مفيد للوحات API أو البوابات الخارجية التي تدير صلاحياتها بشكل مستقل:
 
@@ -303,7 +387,9 @@ php artisan permissions:sync --panel=api
 php artisan permissions:install --panel=api
 ```
 
-## الحماية التلقائية للويدجت
+## المميزات المتقدمة
+
+### الحماية التلقائية للويدجت
 
 يتم إخفاء الويدجت تلقائياً عن المستخدمين غير المصرح لهم — **بدون أي Trait** على الويدجت. تعمل الحماية عبر `Filament::serving()` الذي يفلتر قائمة الويدجت لكل لوحة قبل العرض.
 
@@ -311,17 +397,32 @@ php artisan permissions:install --panel=api
 
 في نموذج الأدوار، تظهر صلاحيات الويدجت في **قسم منفصل** أسفل صلاحيات الأقسام بتخطيط أفقي (4 أعمدة).
 
-## تشخيص الأذونات
+### تشخيص الأذونات
+
+لفحص أدوار وصلاحيات مستخدم معين:
 
 ```bash
 php artisan permissions:check --user=1
 php artisan permissions:check --user=1 --guard=admin
 ```
 
+## التحكم اليدوي
+
+إذا أردت تعطيل الحماية التلقائية واستخدام الـ Traits يدوياً:
+
+```php
+// في ملف config/filament-modular-permissions.php
+'auto_hide_resources' => false,
+
+// ثم استخدم الـ Traits في الموارد أو الويدجت
+use Abdulrahim\FilamentModularPermissions\Traits\HandlesResourcePermissions;
+use Abdulrahim\FilamentModularPermissions\Traits\HandlesWidgetPermissions;
+```
+
 ## الأوامر المتاحة
 
 | الأمر | الوصف |
-|-------|-------|
+| :--- | :--- |
 | `permissions:install [--panel=] [--force] [--skip-user]` | المثبت الموحد (نشر + مزامنة) |
 | `permissions:sync [--panel=]` | مزامنة الصلاحيات (يتخطى المستثناة ما لم يُحدد `--panel`) |
 | `permissions:publish-resources [--panel=] [--force]` | نشر ملفات إدارة الأدوار |
@@ -330,20 +431,11 @@ php artisan permissions:check --user=1 --guard=admin
 | `permissions:publish-lang [--force] [--lang=]` | نشر ملفات الترجمة (اختياريًا لغة محددة فقط) |
 | `permissions:check [--user=] [--guard=]` | تشخيص أدوار وصلاحيات مستخدم |
 
-## التحكم اليدوي (اختياري)
-
-```php
-// تعطيل الحماية الشاملة
-'auto_hide_resources' => false,
-
-// ثم استخدم الـ Traits يدوياً
-use HandlesResourcePermissions;
-use HandlesWidgetPermissions;
-```
-
 ## التواصل
+
 البريد الإلكتروني: [info@abaad.dev](mailto:info@abaad.dev)  
 الموقع الإلكتروني: [abaad.dev](https://abaad.dev)
 
 ## License
+
 MIT License.
