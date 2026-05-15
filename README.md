@@ -6,6 +6,7 @@
 
 A professional Laravel package for modular roles and permissions in **Filament v5**. Supporting multi-panel, auto-syncing, and **Global Zero-Config Protection**.
 
+> **Latest Stable Version**: v1.3.1
 > **Requirements**: PHP 8.2+, Laravel 11+, Filament 5.x, spatie/laravel-permission ^6|^7
 
 ---
@@ -203,6 +204,7 @@ Website: [abaad.dev](https://abaad.dev)
 
 مكتبة احترافية لإدارة الأدوار والصلاحيات في **Filament v5** تعتمد على المبدأ الموديولر، مع دعم كامل لتعدد لوحات التحكم والحماية الشاملة التلقائية.
 
+> **الإصدار المستقر الأخير**: v1.3.1
 > **المتطلبات**: PHP 8.2+، Laravel 11+، Filament 5.x، spatie/laravel-permission ^6|^7
 
 ## المميزات الرئيسية
