@@ -10,7 +10,7 @@ use Illuminate\Support\Str;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 
-#[Signature('permissions:sync')]
+#[Signature('permissions:sync {--panel= : Sync a specific panel only (bypasses excluded_panels config)}')]
 #[Description('Sync all permissions and super admin role from Filament panels based on resources and guards.')]
 class SyncPanelPermissions extends Command
 {
@@ -23,16 +23,42 @@ class SyncPanelPermissions extends Command
         ]);
 
         $customPermissions = config('filament-modular-permissions.custom_permissions', []);
-        $panels            = Filament::getPanels();
+        $excludedPanels    = config('filament-modular-permissions.excluded_panels', []);
+        $explicitPanel     = $this->option('panel');
+
+        // If --panel is given, sync ONLY that panel (bypass exclusions)
+        $allPanels = Filament::getPanels();
+
+        if ($explicitPanel) {
+            if (! isset($allPanels[$explicitPanel])) {
+                $this->components->error("Panel [{$explicitPanel}] not found.");
+                return self::FAILURE;
+            }
+            $panels = [$explicitPanel => $allPanels[$explicitPanel]];
+        } else {
+            $panels = $allPanels;
+        }
 
         $this->newLine();
         $this->components->info('Syncing permissions across ' . count($panels) . ' panel(s)...');
+
+        if (! empty($excludedPanels) && ! $explicitPanel) {
+            $this->line('  <fg=gray>Excluded panels (skipped):</> <fg=yellow>' . implode(', ', $excludedPanels) . '</>');
+        }
+
         $this->newLine();
 
         $grandTotal = 0;
 
-        foreach ($panels as $panel) {
-            $panelId   = $panel->getId();
+        foreach ($panels as $panelId => $panel) {
+
+            // Skip excluded panels (unless --panel was passed explicitly)
+            if (! $explicitPanel && in_array($panelId, $excludedPanels)) {
+                $this->line("  <fg=yellow>SKIP</>  Panel <fg=white>{$panelId}</> <fg=gray>(excluded in config — use --panel={$panelId} to force)</>}");
+                $this->newLine();
+                continue;
+            }
+
             $guard     = $panel->getAuthGuard();
             $resources = $panel->getResources();
             $widgets   = $panel->getWidgets();
@@ -48,8 +74,7 @@ class SyncPanelPermissions extends Command
             // ── Resources ────────────────────────────────────────────────
             $resourceCount = 0;
             foreach ($resources as $resource) {
-                $resourceName = str_replace('Resource', '', class_basename($resource));
-                $snakeName = Str::snake($resourceName);
+                $snakeName = Str::snake(str_replace('Resource', '', class_basename($resource)));
                 foreach ($actions as $action) {
                     Permission::firstOrCreate(['name' => "{$action}_{$snakeName}", 'guard_name' => $guard]);
                     $resourceCount++;

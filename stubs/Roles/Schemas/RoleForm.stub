@@ -19,55 +19,36 @@ class RoleForm
         $guard = Filament::getCurrentPanel()->getAuthGuard();
         $permissions = Permission::where('guard_name', $guard)->get();
 
-        $groupedPermissions = $permissions->groupBy(function ($permission) {
-            $resource = preg_replace('/^(view_any|view|create|update|delete_any|delete|force_delete_any|force_delete|restore_any|restore|reorder|replicate)_/', '', $permission->name);
-            
-            if (str_ends_with($resource, '_widget')) {
-                return 'dashboard_widgets';
-            }
-            
-            return $resource;
+        // ── Separate widgets from resources ─────────────────────────────
+        $widgetPermissions   = $permissions->filter(fn ($p) => str_ends_with($p->name, '_widget'));
+        $resourcePermissions = $permissions->reject(fn ($p)  => str_ends_with($p->name, '_widget'));
+
+        // ── Build Resource Sections ──────────────────────────────────────
+        $resourceSections = [];
+
+        $grouped = $resourcePermissions->groupBy(function ($permission) {
+            return preg_replace('/^(view_any|view|create|update|delete_any|delete|force_delete_any|force_delete|restore_any|restore|reorder|replicate)_/', '', $permission->name);
         });
 
-        $sections = [];
+        foreach ($grouped as $resourceName => $perms) {
+            $translatedResource = static::resolveResourceLabel($resourceName);
 
-        foreach ($groupedPermissions as $resourceName => $perms) {
-            if ($resourceName === 'dashboard_widgets') {
-                $translatedResource = static::translateWidget($resourceName);
-                $options = [];
-                foreach ($perms as $perm) {
-                    $widgetName = str_replace('view_', '', $perm->name);
-                    $translated = __('filament-modular-permissions::permissions.widgets.' . $widgetName);
+            $options = [];
+            foreach ($perms as $perm) {
+                $action           = str_replace("_{$resourceName}", '', $perm->name);
+                $translatedAction = __('filament-modular-permissions::permissions.actions.' . $action);
 
-                    if ($translated === 'filament-modular-permissions::permissions.widgets.' . $widgetName) {
-                        $translated = config(
-                            'filament-modular-permissions.translations.widgets.' . $widgetName,
-                            Str::title(str_replace('_', ' ', $widgetName))
-                        );
-                    }
-
-                    $options[$perm->name] = $translated;
+                if ($translatedAction === 'filament-modular-permissions::permissions.actions.' . $action) {
+                    $translatedAction = config(
+                        'filament-modular-permissions.translations.actions.' . $action,
+                        $action
+                    );
                 }
-            } else {
-                $translatedResource = static::resolveResourceLabel($resourceName);
 
-                $options = [];
-                foreach ($perms as $perm) {
-                    $action = str_replace("_{$resourceName}", '', $perm->name);
-                    $translatedAction = __('filament-modular-permissions::permissions.actions.' . $action);
-
-                    if ($translatedAction === 'filament-modular-permissions::permissions.actions.' . $action) {
-                        $translatedAction = config(
-                            'filament-modular-permissions.translations.actions.' . $action,
-                            $action
-                        );
-                    }
-
-                    $options[$perm->name] = $translatedAction;
-                }
+                $options[$perm->name] = $translatedAction;
             }
 
-            $sections[] = Section::make($translatedResource)
+            $resourceSections[] = Section::make($translatedResource)
                 ->schema([
                     CheckboxList::make("permissions_{$resourceName}")
                         ->hiddenLabel()
@@ -89,31 +70,75 @@ class RoleForm
                 ->collapsible();
         }
 
-        return $schema
-            ->components([
-                Section::make(__('filament-modular-permissions::permissions.role_details.title'))
-                    ->schema([
-                        TextInput::make('name')
-                            ->label(__('filament-modular-permissions::permissions.role_details.name_label'))
-                            ->required()
-                            ->maxLength(255)
-                            ->unique(ignoreRecord: true)
-                            ->disabled(fn (string $operation): bool => $operation === 'edit'),
-                        TextInput::make('guard_name')
-                            ->label(__('filament-modular-permissions::permissions.role_details.guard_label'))
-                            ->default(fn () => Filament::getCurrentPanel()->getAuthGuard())
-                            ->disabled()
-                            ->dehydrated()
-                            ->required(),
-                    ])->columns(2)->columnSpanFull(),
-                
-                Section::make(__('filament-modular-permissions::permissions.permissions_section.title'))
-                    ->columnSpanFull()
-                    ->description(__('filament-modular-permissions::permissions.permissions_section.description'))
-                    ->schema([
-                        Grid::make(['default' => 1, 'md' => 2, 'xl' => 3])->schema($sections)
-                    ]),
-            ]);
+        // ── Build Widget Options ─────────────────────────────────────────
+        $widgetOptions = [];
+        foreach ($widgetPermissions as $perm) {
+            $widgetKey  = str_replace('view_', '', $perm->name);
+            $translated = __('filament-modular-permissions::permissions.widgets.' . $widgetKey);
+
+            if ($translated === 'filament-modular-permissions::permissions.widgets.' . $widgetKey) {
+                $translated = config(
+                    'filament-modular-permissions.translations.widgets.' . $widgetKey,
+                    Str::title(str_replace('_', ' ', $widgetKey))
+                );
+            }
+
+            $widgetOptions[$perm->name] = $translated;
+        }
+
+        // ── Compose the schema ───────────────────────────────────────────
+        $components = [
+            Section::make(__('filament-modular-permissions::permissions.role_details.title'))
+                ->schema([
+                    TextInput::make('name')
+                        ->label(__('filament-modular-permissions::permissions.role_details.name_label'))
+                        ->required()
+                        ->maxLength(255)
+                        ->unique(ignoreRecord: true)
+                        ->disabled(fn (string $operation): bool => $operation === 'edit'),
+                    TextInput::make('guard_name')
+                        ->label(__('filament-modular-permissions::permissions.role_details.guard_label'))
+                        ->default(fn () => Filament::getCurrentPanel()->getAuthGuard())
+                        ->disabled()
+                        ->dehydrated()
+                        ->required(),
+                ])->columns(2)->columnSpanFull(),
+
+            // Resource permissions in a multi-column grid
+            Section::make(__('filament-modular-permissions::permissions.permissions_section.title'))
+                ->columnSpanFull()
+                ->description(__('filament-modular-permissions::permissions.permissions_section.description'))
+                ->schema([
+                    Grid::make(['default' => 1, 'md' => 2, 'xl' => 3])->schema($resourceSections)
+                ]),
+        ];
+
+        // Widget permissions section (only if there are any widgets)
+        if (! empty($widgetOptions)) {
+            $widgetSectionLabel = static::translateWidget('dashboard_widgets');
+
+            $components[] = Section::make($widgetSectionLabel)
+                ->columnSpanFull()
+                ->collapsible()
+                ->schema([
+                    CheckboxList::make('permissions_widgets')
+                        ->hiddenLabel()
+                        ->options($widgetOptions)
+                        ->columns(['default' => 2, 'sm' => 3, 'lg' => 4])
+                        ->gridDirection('row')
+                        ->bulkToggleable()
+                        ->afterStateHydrated(function ($component, $record) use ($widgetPermissions) {
+                            if ($record) {
+                                $component->state(
+                                    $record->permissions->whereIn('id', $widgetPermissions->pluck('id'))->pluck('name')->toArray()
+                                );
+                            }
+                        })
+                        ->dehydrated(true),
+                ]);
+        }
+
+        return $schema->components($components);
     }
 
     /**

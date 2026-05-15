@@ -16,15 +16,17 @@ A professional Laravel package for modular roles and permissions in **Filament v
 
 ## Features
 
-- **Global Zero-Config Shield**: Protect and hide all resources and widgets automatically based on permissions — no traits needed.
+- **Global Zero-Config Shield**: Protect and hide all resources **and widgets** automatically — no traits needed on any file.
 - **Smart Sync**: Sync all resources, widgets, and custom permissions with Spatie in one command.
 - **Custom Permissions**: Define standalone permissions (e.g. `export_reports`) directly in config.
 - **Multi-panel Support**: Publish and manage permissions for each panel independently.
+- **Panel Exclusion**: Exclude specific panels from automatic syncing via config; override explicitly with `--panel`.
 - **Super Admin Gate**: Automatically grants full access to the `super_admin` role via `Gate::before`.
 - **Interactive CLI**: Select your target panel via an interactive CLI menu.
 - **Safe Publishing**: Publish commands skip existing files by default; use `--force` to overwrite.
 - **Diagnostics**: Inspect any user's roles and permissions with `permissions:check`.
 - **User Management**: Pre-configured User Resource with role management.
+- **Separated Widget Permissions**: Widget permissions appear in a dedicated section in the Role form.
 
 ## Installation
 
@@ -41,17 +43,17 @@ php artisan permissions:install
 ```
 
 This command does three things automatically:
-1. Syncs all permissions from your Filament panels to the database
-2. Publishes the **Role Management** Resource (to manage roles & assign permissions)
-3. Publishes the **User Management** Resource (to manage users & assign roles)
+1. Publishes the **Role Management** Resource
+2. Publishes the **User Management** Resource
+3. Syncs all permissions from your Filament panels to the database
 
 Then register both published resources in your Filament panel.
 
 > Or run each step individually if you need more control:
 > ```bash
-> php artisan permissions:sync                   # Step 1: sync permissions
-> php artisan permissions:publish-resources      # Step 2: publish Role Resource
-> php artisan permissions:publish-user-resource  # Step 3: publish User Resource
+> php artisan permissions:publish-resources      # Step 1: publish Role Resource
+> php artisan permissions:publish-user-resource  # Step 2: publish User Resource
+> php artisan permissions:sync                   # Step 3: sync permissions
 > ```
 
 > [!IMPORTANT]
@@ -103,6 +105,44 @@ To add standalone permissions not tied to any resource, define them in your conf
 
 Then run `php artisan permissions:sync` to register them.
 
+## Excluding Panels from Sync
+
+Exclude specific panels from automatic syncing — useful for API panels, customer portals, or any panel that manages its own permissions separately:
+
+```php
+// config/filament-modular-permissions.php
+'excluded_panels' => [
+    'api',
+    'customer_portal',
+],
+```
+
+Excluded panels are skipped by default; use `--panel` to bypass the exclusion explicitly:
+
+```bash
+# Normal sync — skips excluded panels
+php artisan permissions:sync
+
+# Force-sync a specific panel (bypasses exclusion)
+php artisan permissions:sync --panel=api
+
+# Same via the installer
+php artisan permissions:install --panel=api
+```
+
+## Widget Auto-Protection
+
+Widgets are automatically hidden from users who don't have the required permission — **no trait needed on any widget class**.
+
+The package uses a `Filament::serving()` hook to filter the widget list per-panel before rendering. The permission name follows the pattern `view_{snake_widget_name}`.
+
+Run `php artisan permissions:sync` to register widget permissions, then assign them to roles via the Role form.
+
+In the Role form, widget permissions are displayed in a **dedicated section** below the resource sections, with a wider horizontal layout (4 columns) for easy scanning.
+
+> [!NOTE]
+> If you set `auto_hide_resources => false` in config, widget auto-protection is also disabled. You can then use the `HandlesWidgetPermissions` trait manually on each widget.
+
 ## Diagnostics
 
 Inspect a user's roles and effective permissions:
@@ -121,7 +161,10 @@ The package handles multi-panel environments where each panel uses a different A
 The `super_admin` role is granted full access via a global `Gate::before` check. This hook returns `null` (not `false`) when denying, so your own Policies always remain active.
 
 ### 3. Policy Compatibility
-The `Gate::before` hook only intercepts known Filament abilities (`viewAny`, `view`, `create`, etc.) on Eloquent models. All other policy checks are unaffected.
+The `Gate::before` hook only intercepts known Filament abilities (`viewAny`, `view`, `create`, `update`, `delete`, etc.) on Eloquent models. All other policy checks are unaffected.
+
+### 4. Model Instance Support
+The gate check handles both class strings (used by `viewAny`/`create`) and model instances (used by `update`/`delete`/`restore`), ensuring all permission types are enforced correctly across all actions.
 
 ## Manual Control (Optional)
 
@@ -142,14 +185,16 @@ use Abdulrahim\FilamentModularPermissions\Traits\HandlesWidgetPermissions;
 
 | Command | Description |
 |---------|-------------|
-| `permissions:install` | All-in-one installer (sync + publish resources) |
-| `permissions:sync` | Sync all resource, widget, and custom permissions |
+| `permissions:install [--panel=] [--force] [--skip-user]` | All-in-one installer (publish + sync) |
+| `permissions:sync [--panel=]` | Sync permissions (skips excluded panels unless `--panel` is set) |
 | `permissions:publish-resources [--panel=] [--force]` | Publish Role Resource files |
 | `permissions:publish-user-resource [--panel=] [--force]` | Publish User Resource files |
+| `permissions:publish-config [--force]` | Publish the package config file |
+| `permissions:publish-lang [--force] [--lang=]` | Publish translation files (optionally one language only) |
 | `permissions:check [--user=] [--guard=]` | Diagnose user roles and permissions |
 
 ## Contact
-Email: [abaad.dev8@gmail.com](mailto:abaad.dev8@gmail.com)  
+Email: [info@abaad.dev](mailto:info@abaad.dev)  
 Website: [abaad.dev](https://abaad.dev)
 
 ---
@@ -162,14 +207,16 @@ Website: [abaad.dev](https://abaad.dev)
 
 ## المميزات الرئيسية
 
-- **الحماية الشاملة التلقائية**: حماية المسارات وإخفاء الموارد من القائمة الجانبية تلقائياً بمجرد التثبيت.
+- **الحماية الشاملة التلقائية**: حماية المسارات وإخفاء الموارد **والويدجت** من القائمة الجانبية تلقائياً — دون الحاجة لأي Trait.
 - **نظام مزامنة ذكي**: أمر واحد لمزامنة جميع الموارد والويدجت والصلاحيات المخصصة.
 - **صلاحيات مخصصة**: تعريف صلاحيات مستقلة مثل `export_reports` من الـ config مباشرةً.
 - **دعم تعدد اللوحات**: إدارة الصلاحيات لكل لوحة تحكم بشكل مستقل تماماً.
+- **استثناء اللوحات**: استثناء لوحات معينة من المزامنة التلقائية مع إمكانية تجاوز الاستثناء بـ `--panel`.
 - **السوبر أدمن**: نظام `Gate::before` يعطي كافة الصلاحيات لدور `super_admin` تلقائياً.
-- **نشر آمن**: أوامر النشر تتجاوز الملفات الموجودة بشكل افتراضي؛ استخدم `--force` للكتابة فوقها.
+- **نشر آمن**: أوامر النشر تتجاوز الملفات الموجودة افتراضياً؛ استخدم `--force` للكتابة فوقها.
 - **تشخيص الأذونات**: فحص أدوار وصلاحيات أي مستخدم عبر `permissions:check`.
 - **إدارة المستخدمين**: مورد إدارة مستخدمين جاهز مع إمكانية ربط الأدوار.
+- **قسم منفصل للويدجت**: صلاحيات الويدجت تُعرض في قسم خاص بها في نموذج إنشاء الأدوار.
 
 ## التثبيت
 
@@ -186,21 +233,21 @@ php artisan permissions:install
 ```
 
 يقوم هذا الأمر بثلاثة أشياء تلقائياً:
-1. مزامنة جميع الصلاحيات من لوحات Filament إلى قاعدة البيانات
-2. نشر **واجهة إدارة الأدوار** (لإنشاء الأدوار وتعيين الصلاحيات)
-3. نشر **واجهة إدارة المستخدمين** (لإدارة المستخدمين وربطهم بالأدوار)
+1. نشر **واجهة إدارة الأدوار**
+2. نشر **واجهة إدارة المستخدمين**
+3. مزامنة جميع الصلاحيات من لوحات Filament إلى قاعدة البيانات
 
 بعد ذلك، سجّل الـ Resources المنشورة في لوحة Filament الخاصة بك.
 
-> أو نفّذ كل خطوة بشكل منفرد إذا أردت تحكماً أكثر:
+> أو نفّذ كل خطوة بشكل منفرد:
 > ```bash
-> php artisan permissions:sync                   # الخطوة 1: مزامنة الصلاحيات
-> php artisan permissions:publish-resources      # الخطوة 2: نشر واجهة الأدوار
-> php artisan permissions:publish-user-resource  # الخطوة 3: نشر واجهة المستخدمين
+> php artisan permissions:publish-resources      # الخطوة 1: نشر واجهة الأدوار
+> php artisan permissions:publish-user-resource  # الخطوة 2: نشر واجهة المستخدمين
+> php artisan permissions:sync                   # الخطوة 3: مزامنة الصلاحيات
 > ```
 
 > [!IMPORTANT]
-> أعد تشغيل `php artisan permissions:sync` في كل مرة تضيف فيها مورداً (Resource) أو ويدجت (Widget) جديداً لتسجيل صلاحياته في قاعدة البيانات.
+> أعد تشغيل `php artisan permissions:sync` في كل مرة تضيف فيها مورداً (Resource) أو ويدجت (Widget) جديداً.
 
 > [!TIP]
 > للنشر على لوحة محددة أو لإعادة النشر فوق الملفات الموجودة:
@@ -231,6 +278,37 @@ $admin->assignRole('super_admin');
 
 ثم شغّل: `php artisan permissions:sync`
 
+## استثناء اللوحات من المزامنة
+
+مفيد للوحات API أو البوابات الخارجية التي تدير صلاحياتها بشكل مستقل:
+
+```php
+// config/filament-modular-permissions.php
+'excluded_panels' => [
+    'api',
+    'customer_portal',
+],
+```
+
+```bash
+# مزامنة عادية — يتخطى اللوحات المستثناة
+php artisan permissions:sync
+
+# إجبار مزامنة لوحة محددة (يتجاوز الاستثناء)
+php artisan permissions:sync --panel=api
+
+# نفس الشيء عبر المثبت
+php artisan permissions:install --panel=api
+```
+
+## الحماية التلقائية للويدجت
+
+يتم إخفاء الويدجت تلقائياً عن المستخدمين غير المصرح لهم — **بدون أي Trait** على الويدجت. تعمل الحماية عبر `Filament::serving()` الذي يفلتر قائمة الويدجت لكل لوحة قبل العرض.
+
+اسم الصلاحية: `view_{اسم_الويدجت_بـ_snake_case}` — شغّل `permissions:sync` لتسجيلها.
+
+في نموذج الأدوار، تظهر صلاحيات الويدجت في **قسم منفصل** أسفل صلاحيات الأقسام بتخطيط أفقي (4 أعمدة).
+
 ## تشخيص الأذونات
 
 ```bash
@@ -242,10 +320,12 @@ php artisan permissions:check --user=1 --guard=admin
 
 | الأمر | الوصف |
 |-------|-------|
-| `permissions:install` | المثبت الموحد (sync + نشر الموارد) |
-| `permissions:sync` | مزامنة جميع الصلاحيات |
+| `permissions:install [--panel=] [--force] [--skip-user]` | المثبت الموحد (نشر + مزامنة) |
+| `permissions:sync [--panel=]` | مزامنة الصلاحيات (يتخطى المستثناة ما لم يُحدد `--panel`) |
 | `permissions:publish-resources [--panel=] [--force]` | نشر ملفات إدارة الأدوار |
 | `permissions:publish-user-resource [--panel=] [--force]` | نشر ملفات إدارة المستخدمين |
+| `permissions:publish-config [--force]` | نشر ملف الإعدادات (config) |
+| `permissions:publish-lang [--force] [--lang=]` | نشر ملفات الترجمة (اختياريًا لغة محددة فقط) |
 | `permissions:check [--user=] [--guard=]` | تشخيص أدوار وصلاحيات مستخدم |
 
 ## التحكم اليدوي (اختياري)
@@ -260,7 +340,7 @@ use HandlesWidgetPermissions;
 ```
 
 ## التواصل
-البريد الإلكتروني: [abaad.dev8@gmail.com](mailto:abaad.dev8@gmail.com)  
+البريد الإلكتروني: [info@abaad.dev](mailto:info@abaad.dev)  
 الموقع الإلكتروني: [abaad.dev](https://abaad.dev)
 
 ## License

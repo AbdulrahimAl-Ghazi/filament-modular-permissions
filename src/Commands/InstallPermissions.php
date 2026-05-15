@@ -38,9 +38,13 @@ class InstallPermissions extends Command
         }
 
         // ── Step 3: Sync ────────────────────────────────────────────────
+        $syncArgs = array_filter([
+            '--panel' => $this->option('panel') ?: null,
+        ]);
+
         $this->components->task(
             '<fg=cyan>Step 3/3</> Syncing all permissions (including newly published resources)',
-            fn () => $this->callSilently('permissions:sync') === 0
+            fn () => $this->callSilently('permissions:sync', $syncArgs) === 0
         );
 
         $this->newLine();

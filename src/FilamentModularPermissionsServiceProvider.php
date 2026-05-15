@@ -8,6 +8,8 @@ use Abdulrahim\FilamentModularPermissions\Commands\PublishUserResource;
 use Abdulrahim\FilamentModularPermissions\Commands\SyncPanelPermissions;
 use Abdulrahim\FilamentModularPermissions\Commands\InstallPermissions;
 use Abdulrahim\FilamentModularPermissions\Commands\CheckUserPermissions;
+use Abdulrahim\FilamentModularPermissions\Commands\PublishConfig;
+use Abdulrahim\FilamentModularPermissions\Commands\PublishLang;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Str;
 use Filament\Facades\Filament;
@@ -22,21 +24,19 @@ class FilamentModularPermissionsServiceProvider extends ServiceProvider
         // Global Authorization Logic
         Gate::before(function ($user, $ability, $args) {
             // 1. Super Admin Always Allowed
-            $roleName = config('filament-modular-permissions.super_admin_role_name', 'super_admin');
+            $superAdminRole = config('filament-modular-permissions.super_admin_role_name', 'super_admin');
             
             try {
-                if ($user->hasRole($roleName)) {
+                if ($user->hasRole($superAdminRole)) {
                     return true;
                 }
             } catch (\Throwable $e) {
-                // If role check fails (e.g. Spatie tables missing), let it pass to other policies
                 return null;
             }
 
-            // 2. Global Auto-Hiding Logic (for Resources & Navigation)
+            // 2. Global Auto-Hiding Logic
             if (config('filament-modular-permissions.auto_hide_resources', true)) {
                 
-                // Map Filament standard actions to our modular permissions
                 $abilityMap = [
                     'viewAny' => 'view_any',
                     'view' => 'view',
@@ -53,40 +53,85 @@ class FilamentModularPermissionsServiceProvider extends ServiceProvider
                 ];
 
                 // Check if it's a model authorization (Filament Resources)
-                if (isset($abilityMap[$ability]) && isset($args[0]) && is_string($args[0]) && class_exists($args[0])) {
-                    if (is_subclass_of($args[0], 'Illuminate\Database\Eloquent\Model')) {
-                        $modelName = Str::snake(class_basename($args[0]));
+                // $args[0] can be a class string (viewAny/create) OR a model instance (update/delete/etc)
+                if (isset($abilityMap[$ability]) && isset($args[0])) {
+                    $subject    = $args[0];
+                    $modelClass = is_object($subject) ? get_class($subject) : $subject;
+
+                    if (is_string($modelClass) && class_exists($modelClass) && is_subclass_of($modelClass, \Illuminate\Database\Eloquent\Model::class)) {
+                        $modelName  = Str::snake(class_basename($modelClass));
                         $permission = "{$abilityMap[$ability]}_{$modelName}";
 
                         try {
-                            if ($user->hasPermissionTo($permission)) {
-                                return true;
-                            }
+                            return $user->hasPermissionTo($permission) ? true : false;
                         } catch (\Throwable $e) {
-                            // Permission doesn't exist in DB, handle gracefully
-                            return null;
+                            return false;
                         }
-
-                        return null;
                     }
-                }
-
-                // Check if it's a widget authorization (Custom Permission Check)
-                if (str_starts_with($ability, 'view_') && str_ends_with($ability, '_widget')) {
-                    try {
-                        if ($user->hasPermissionTo($ability)) {
-                            return true;
-                        }
-                    } catch (\Throwable $e) {
-                        return null;
-                    }
-
-                    return null;
                 }
             }
 
-            return null; // Let other policies handle it if not caught
+            return null;
         });
+
+        // ── Auto Widget Protection ───────────────────────────────────────────
+        // Filament does NOT call Gate for widgets — it calls Widget::canView() directly.
+        // So we filter the widget list per-panel in serving() before any rendering occurs.
+        if (config('filament-modular-permissions.auto_hide_resources', true)) {
+            Filament::serving(function () {
+                $user = auth()->user();
+                if (! $user) return;
+
+                $superRole = config('filament-modular-permissions.super_admin_role_name', 'super_admin');
+
+                try {
+                    if ($user->hasRole($superRole)) return; // Super admin sees everything
+                } catch (\Throwable) {
+                    return;
+                }
+
+                foreach (Filament::getPanels() as $panel) {
+                    $guard = $panel->getAuthGuard();
+
+                    try {
+                        // Access the raw widgets list via reflection
+                        $ref  = new \ReflectionClass($panel);
+                        $prop = null;
+                        $cls  = $ref;
+
+                        while ($cls) {
+                            if ($cls->hasProperty('widgets')) {
+                                $prop = $cls->getProperty('widgets');
+                                $prop->setAccessible(true);
+                                break;
+                            }
+                            $cls = $cls->getParentClass();
+                        }
+
+                        if (! $prop) continue;
+
+                        $widgets = $prop->getValue($panel);
+
+                        $filtered = array_values(array_filter($widgets, function ($widgetClass) use ($user, $guard) {
+                            $snakeName  = Str::snake(class_basename($widgetClass));
+                            $permission = "view_{$snakeName}";
+
+                            try {
+                                return $user->hasPermissionTo($permission, $guard);
+                            } catch (\Throwable) {
+                                // Permission doesn't exist in DB → deny
+                                return false;
+                            }
+                        }));
+
+                        $prop->setValue($panel, $filtered);
+                    } catch (\Throwable) {
+                        // If anything fails, do nothing (fail open for safety)
+                        continue;
+                    }
+                }
+            });
+        }
 
         if ($this->app->runningInConsole()) {
             $this->commands([
@@ -95,6 +140,8 @@ class FilamentModularPermissionsServiceProvider extends ServiceProvider
                 SyncPanelPermissions::class,
                 InstallPermissions::class,
                 CheckUserPermissions::class,
+                PublishConfig::class,
+                PublishLang::class,
             ]);
 
             // Publishing config

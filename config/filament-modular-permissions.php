@@ -86,6 +86,26 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Excluded Panels
+    |--------------------------------------------------------------------------
+    |
+    | List panel IDs that should be excluded from automatic permission syncing.
+    | Excluded panels are skipped when running `permissions:sync` unless you
+    | explicitly pass `--panel=<id>` to force-include a specific panel.
+    |
+    | This is useful for panels that manage their own permissions separately,
+    | such as an API panel, a customer-facing portal, or a separate admin area.
+    |
+    | Example: ['api', 'customer_portal']
+    |
+    */
+    'excluded_panels' => [
+        // 'api',
+        // 'customer_portal',
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Custom Translations (Quick Overrides)
     |--------------------------------------------------------------------------
     |
