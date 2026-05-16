@@ -6,7 +6,7 @@
 
 A professional Laravel package for modular roles and permissions in **Filament v5**. Supporting multi-panel, auto-syncing, and **Global Zero-Config Protection**.
 
-> **Latest Stable Version**: v1.5.0
+> **Latest Stable Version**: v1.5.1
 > **Requirements**: PHP 8.2+, Laravel 11+, Filament 5.x, spatie/laravel-permission ^6|^7
 
 ---
@@ -88,7 +88,7 @@ Then register both published resources in your Filament panel.
 > Or run each step individually if you need more control:
 >
 > ```bash
-> php artisan permissions:publish-resources      # Step 1: publish Role Resource
+> php artisan permissions:publish-role-resource  # Step 1: publish Role Resource
 > php artisan permissions:publish-user-resource  # Step 2: publish User Resource
 > php artisan permissions:sync                   # Step 3: sync permissions
 > ```
@@ -228,7 +228,7 @@ use Abdulrahim\FilamentModularPermissions\Traits\HandlesWidgetPermissions;
 | :--- | :--- |
 | `permissions:install [--panel=] [--force] [--skip-user]` | All-in-one installer (publish + sync) |
 | `permissions:sync [--panel=]` | Sync permissions (skips excluded panels unless `--panel` is set) |
-| `permissions:publish-resources [--panel=] [--force]` | Publish Role Resource files |
+| `permissions:publish-role-resource [--panel=] [--force]` | Publish Role Resource files |
 | `permissions:publish-user-resource [--panel=] [--force]` | Publish User Resource files |
 | `permissions:publish-config [--force]` | Publish the package config file |
 | `permissions:publish-lang [--force] [--lang=]` | Publish translation files (optionally one language only) |
@@ -244,7 +244,7 @@ Website: [abaad.dev](https://abaad.dev)
 <a name="التوثيق-العربي"></a>
 # التوثيق العربي
 
-> **آخر إصدار مستقر**: v1.5.0
+> **آخر إصدار مستقر**: v1.5.1
 > **المتطلبات**: PHP 8.2+، Laravel 11+، Filament 5.x، spatie/laravel-permission ^6|^7
 
 ## فهرس المحتويات
@@ -315,7 +315,7 @@ php artisan permissions:install
 > أو نفّذ كل خطوة بشكل منفرد:
 >
 > ```bash
-> php artisan permissions:publish-resources      # الخطوة 1: نشر واجهة الأدوار
+> php artisan permissions:publish-role-resource  # الخطوة 1: نشر واجهة الأدوار
 > php artisan permissions:publish-user-resource  # الخطوة 2: نشر واجهة المستخدمين
 > php artisan permissions:sync                   # الخطوة 3: مزامنة الصلاحيات
 > ```
@@ -425,7 +425,7 @@ use Abdulrahim\FilamentModularPermissions\Traits\HandlesWidgetPermissions;
 | :--- | :--- |
 | `permissions:install [--panel=] [--force] [--skip-user]` | المثبت الموحد (نشر + مزامنة) |
 | `permissions:sync [--panel=]` | مزامنة الصلاحيات (يتخطى المستثناة ما لم يُحدد `--panel`) |
-| `permissions:publish-resources [--panel=] [--force]` | نشر ملفات إدارة الأدوار |
+| `permissions:publish-role-resource [--panel=] [--force]` | نشر ملفات إدارة الأدوار |
 | `permissions:publish-user-resource [--panel=] [--force]` | نشر ملفات إدارة المستخدمين |
 | `permissions:publish-config [--force]` | نشر ملف الإعدادات (config) |
 | `permissions:publish-lang [--force] [--lang=]` | نشر ملفات الترجمة (اختياريًا لغة محددة فقط) |

@@ -2,18 +2,18 @@
 
 namespace Abdulrahim\FilamentModularPermissions\Commands;
 
-use Illuminate\Console\Attributes\Description;
-use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
 use Filament\Facades\Filament;
 use Illuminate\Support\Str;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 
-#[Signature('permissions:sync {--panel= : Sync a specific panel only (bypasses excluded_panels config)}')]
-#[Description('Sync all permissions and super admin role from Filament panels based on resources and guards.')]
 class SyncPanelPermissions extends Command
 {
+    protected $signature = 'permissions:sync {--panel= : Sync a specific panel only (bypasses excluded_panels config)}';
+
+    protected $description = 'Sync all permissions and super admin role from Filament panels based on resources and guards.';
+
     public function handle(): int
     {
         $actions = config('filament-modular-permissions.actions', [

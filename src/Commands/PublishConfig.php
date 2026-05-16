@@ -3,14 +3,14 @@
 namespace Abdulrahim\FilamentModularPermissions\Commands;
 
 use Illuminate\Console\Command;
-use Illuminate\Console\Attributes\Description;
-use Illuminate\Console\Attributes\Signature;
 use Illuminate\Support\Facades\File;
 
-#[Signature('permissions:publish-config {--force : Overwrite existing config file}')]
-#[Description('Publish the Filament Modular Permissions config file to your application.')]
 class PublishConfig extends Command
 {
+    protected $signature = 'permissions:publish-config {--force : Overwrite existing config file}';
+
+    protected $description = 'Publish the Filament Modular Permissions config file to your application.';
+
     public function handle(): int
     {
         $source      = __DIR__ . '/../../config/filament-modular-permissions.php';

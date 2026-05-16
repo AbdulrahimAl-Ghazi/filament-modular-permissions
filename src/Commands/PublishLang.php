@@ -3,14 +3,14 @@
 namespace Abdulrahim\FilamentModularPermissions\Commands;
 
 use Illuminate\Console\Command;
-use Illuminate\Console\Attributes\Description;
-use Illuminate\Console\Attributes\Signature;
 use Illuminate\Support\Facades\File;
 
-#[Signature('permissions:publish-lang {--force : Overwrite existing translation files} {--lang= : Publish a specific language only (e.g. en, ar)}')]
-#[Description('Publish the Filament Modular Permissions translation files to your application.')]
 class PublishLang extends Command
 {
+    protected $signature = 'permissions:publish-lang {--force : Overwrite existing translation files} {--lang= : Publish a specific language only (e.g. en, ar)}';
+
+    protected $description = 'Publish the Filament Modular Permissions translation files to your application.';
+
     public function handle(): int
     {
         $sourcePath      = __DIR__ . '/../../lang';

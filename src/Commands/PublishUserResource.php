@@ -4,15 +4,15 @@ namespace Abdulrahim\FilamentModularPermissions\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\File;
-use Illuminate\Console\Attributes\Description;
-use Illuminate\Console\Attributes\Signature;
 use Filament\Facades\Filament;
 use Illuminate\Support\Str;
 
-#[Description('Publish Filament User Resource for panel management')]
-#[Signature('permissions:publish-user-resource {--panel= : The ID of the panel to publish to} {--force : Overwrite existing files}')]
 class PublishUserResource extends Command
 {
+    protected $signature = 'permissions:publish-user-resource {--panel= : The ID of the panel to publish to} {--force : Overwrite existing files}';
+
+    protected $description = 'Publish Filament User Resource for panel management';
+
     public function handle(): int
     {
         $panelId = $this->option('panel');

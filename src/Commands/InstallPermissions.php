@@ -3,13 +3,13 @@
 namespace Abdulrahim\FilamentModularPermissions\Commands;
 
 use Illuminate\Console\Command;
-use Illuminate\Console\Attributes\Description;
-use Illuminate\Console\Attributes\Signature;
 
-#[Signature('permissions:install {--panel= : The ID of the panel to install to} {--force : Overwrite existing files} {--skip-user : Skip publishing the User Resource}')]
-#[Description('Install Filament Modular Permissions: sync permissions and publish all resources in one step.')]
 class InstallPermissions extends Command
 {
+    protected $signature = 'permissions:install {--panel= : The ID of the panel to install to} {--force : Overwrite existing files} {--skip-user : Skip publishing the User Resource}';
+
+    protected $description = 'Install Filament Modular Permissions: sync permissions and publish all resources in one step.';
+
     public function handle(): void
     {
         $this->newLine();
@@ -24,7 +24,7 @@ class InstallPermissions extends Command
         // ── Step 1: Role Resources ───────────────────────────────────────
         $this->components->task(
             '<fg=cyan>Step 1/3</> Publishing Role Management Resource',
-            fn () => $this->callSilently('permissions:publish-resources', $publishArgs) === 0
+            fn () => $this->callSilently('permissions:publish-role-resource', $publishArgs) === 0
         );
 
         // ── Step 2: User Resource ────────────────────────────────────────

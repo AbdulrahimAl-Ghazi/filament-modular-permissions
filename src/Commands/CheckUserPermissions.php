@@ -3,15 +3,15 @@
 namespace Abdulrahim\FilamentModularPermissions\Commands;
 
 use Illuminate\Console\Command;
-use Illuminate\Console\Attributes\Description;
-use Illuminate\Console\Attributes\Signature;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 
-#[Signature('permissions:check {--user= : The user ID to check permissions for} {--guard=web : The guard to check against}')]
-#[Description('Diagnose and display all roles and permissions for a specific user.')]
 class CheckUserPermissions extends Command
 {
+    protected $signature = 'permissions:check {--user= : The user ID to check permissions for} {--guard=web : The guard to check against}';
+
+    protected $description = 'Diagnose and display all roles and permissions for a specific user.';
+
     public function handle(): int
     {
         $userId    = $this->option('user');
