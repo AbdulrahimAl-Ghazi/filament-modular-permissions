@@ -9,7 +9,7 @@ use Filament\Schemas\Schema;
 use Illuminate\Support\Facades\Hash;
 use Filament\Facades\Filament;
 
-class UserForm
+class PanelUserForm
 {
     public static function configure(Schema $schema): Schema
     {

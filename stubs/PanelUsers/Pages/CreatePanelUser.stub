@@ -1,0 +1,11 @@
+<?php
+
+namespace {{namespace}}\Pages;
+
+use {{namespace}}\PanelUserResource;
+use Filament\Resources\Pages\CreateRecord;
+
+class CreatePanelUser extends CreateRecord
+{
+    protected static string $resource = PanelUserResource::class;
+}

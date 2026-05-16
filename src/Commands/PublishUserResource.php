@@ -39,16 +39,16 @@ class PublishUserResource extends Command
         }
 
         $panelName     = Str::studly($panelId);
-        $namespace     = "App\\Filament\\{$panelName}\\Resources\\Users";
-        $resourcesPath = app_path("Filament/{$panelName}/Resources/Users");
+        $namespace     = "App\\Filament\\{$panelName}\\Resources\\PanelUsers";
+        $resourcesPath = app_path("Filament/{$panelName}/Resources/PanelUsers");
 
         if ($panelId === 'admin' && ! File::exists(app_path('Filament/Admin'))) {
-            $namespace     = 'App\\Filament\\Resources\\Users';
-            $resourcesPath = app_path('Filament/Resources/Users');
+            $namespace     = 'App\\Filament\\Resources\\PanelUsers';
+            $resourcesPath = app_path('Filament/Resources/PanelUsers');
         }
 
-        $customStubPath  = base_path('stubs/filament-modular-permissions/Users');
-        $packageStubPath = __DIR__ . '/../../stubs/Users';
+        $customStubPath  = base_path('stubs/filament-modular-permissions/PanelUsers');
+        $packageStubPath = __DIR__ . '/../../stubs/PanelUsers';
         $stubPath        = File::exists($customStubPath) ? $customStubPath : $packageStubPath;
         $usingCustomStubs = File::exists($customStubPath);
 
@@ -71,12 +71,12 @@ class PublishUserResource extends Command
         ];
 
         $files = [
-            $stubPath . '/UserResource.stub'        => $resourcesPath . '/UserResource.php',
-            $stubPath . '/Pages/ListUsers.stub'     => $resourcesPath . '/Pages/ListUsers.php',
-            $stubPath . '/Pages/CreateUser.stub'    => $resourcesPath . '/Pages/CreateUser.php',
-            $stubPath . '/Pages/EditUser.stub'      => $resourcesPath . '/Pages/EditUser.php',
-            $stubPath . '/Schemas/UserForm.stub'    => $resourcesPath . '/Schemas/UserForm.php',
-            $stubPath . '/Tables/UsersTable.stub'   => $resourcesPath . '/Tables/UsersTable.php',
+            $stubPath . '/PanelUserResource.stub'   => $resourcesPath . '/PanelUserResource.php',
+            $stubPath . '/Pages/ListPanelUsers.stub' => $resourcesPath . '/Pages/ListPanelUsers.php',
+            $stubPath . '/Pages/CreatePanelUser.stub' => $resourcesPath . '/Pages/CreatePanelUser.php',
+            $stubPath . '/Pages/EditPanelUser.stub'   => $resourcesPath . '/Pages/EditPanelUser.php',
+            $stubPath . '/Schemas/PanelUserForm.stub' => $resourcesPath . '/Schemas/PanelUserForm.php',
+            $stubPath . '/Tables/PanelUsersTable.stub' => $resourcesPath . '/Tables/PanelUsersTable.php',
         ];
 
         $published = 0;

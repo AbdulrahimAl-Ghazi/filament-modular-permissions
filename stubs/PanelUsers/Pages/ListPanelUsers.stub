@@ -2,13 +2,13 @@
 
 namespace {{namespace}}\Pages;
 
-use {{namespace}}\UserResource;
+use {{namespace}}\PanelUserResource;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
 
-class ListUsers extends ListRecords
+class ListPanelUsers extends ListRecords
 {
-    protected static string $resource = UserResource::class;
+    protected static string $resource = PanelUserResource::class;
 
     protected function getHeaderActions(): array
     {

@@ -152,22 +152,16 @@ class RoleForm
      */
     protected static function resolveResourceLabel(string $resourceName): string
     {
-        // 1. Try lang file
-        $translated = __('filament-modular-permissions::permissions.resources.' . $resourceName);
-        if ($translated !== 'filament-modular-permissions::permissions.resources.' . $resourceName) {
-            return $translated;
-        }
-
-        // 2. Try config override
+        // 1. Try config override (highest priority)
         $configOverride = config('filament-modular-permissions.translations.resources.' . $resourceName);
         if ($configOverride !== null) {
             return $configOverride;
         }
 
-        // 3. Search across all registered Filament panel resources
+        // 2. Search across all registered Filament panel resources and use getNavigationLabel()
         foreach (Filament::getPanels() as $panel) {
             foreach ($panel->getResources() as $resourceClass) {
-                $snakeClass = Str::snake(class_basename($resourceClass));
+                $snakeClass = Str::snake(str_replace('Resource', '', class_basename($resourceClass)));
                 if ($snakeClass === $resourceName) {
                     try {
                         return $resourceClass::getNavigationLabel();
@@ -176,6 +170,12 @@ class RoleForm
                     }
                 }
             }
+        }
+
+        // 3. Try package lang file
+        $translated = __('filament-modular-permissions::permissions.resources.' . $resourceName);
+        if ($translated !== 'filament-modular-permissions::permissions.resources.' . $resourceName) {
+            return $translated;
         }
 
         // 4. Title-case fallback

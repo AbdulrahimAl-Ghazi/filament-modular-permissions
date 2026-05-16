@@ -6,7 +6,7 @@
 
 A professional Laravel package for modular roles and permissions in **Filament v5**. Supporting multi-panel, auto-syncing, and **Global Zero-Config Protection**.
 
-> **Latest Stable Version**: v1.5.1
+> **Latest Stable Version**: v1.5.4
 > **Requirements**: PHP 8.2+, Laravel 11+, Filament 5.x, spatie/laravel-permission ^6|^7
 
 ---
@@ -46,8 +46,9 @@ A professional Laravel package for modular roles and permissions in **Filament v
 - **Interactive CLI**: Select your target panel via an interactive CLI menu.
 - **Safe Publishing**: Publish commands skip existing files by default; use `--force` to overwrite.
 - **Diagnostics**: Inspect any user's roles and permissions with `permissions:check`.
-- **User Management**: Pre-configured User Resource with role management.
+- **Panel User Management**: Pre-configured PanelUserResource with role management and automatic guard-based filtering.
 - **Separated Widget Permissions**: Widget permissions appear in a dedicated section in the Role form.
+- **Dynamic Resource Labels**: Role permissions sections automatically use the resource's `getNavigationLabel()`.
 
 ## Installation
 
@@ -80,7 +81,7 @@ php artisan permissions:install
 This command does three things automatically:
 
 1. Publishes the **Role Management** Resource
-2. Publishes the **User Management** Resource
+2. Publishes the **Panel User Management** Resource
 3. Syncs all permissions from your Filament panels to the database
 
 Then register both published resources in your Filament panel.
@@ -244,7 +245,7 @@ Website: [abaad.dev](https://abaad.dev)
 <a name="التوثيق-العربي"></a>
 # التوثيق العربي
 
-> **آخر إصدار مستقر**: v1.5.1
+> **آخر إصدار مستقر**: v1.5.4
 > **المتطلبات**: PHP 8.2+، Laravel 11+، Filament 5.x، spatie/laravel-permission ^6|^7
 
 ## فهرس المحتويات
@@ -307,7 +308,7 @@ php artisan permissions:install
 يقوم هذا الأمر بثلاثة أشياء تلقائياً:
 
 1. نشر **واجهة إدارة الأدوار**
-2. نشر **واجهة إدارة المستخدمين**
+2. نشر **واجهة إدارة مستخدمي اللوحة**
 3. مزامنة جميع الصلاحيات من لوحات Filament إلى قاعدة البيانات
 
 بعد ذلك، سجّل الـ Resources المنشورة في لوحة Filament الخاصة بك.
