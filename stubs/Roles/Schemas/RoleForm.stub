@@ -145,10 +145,11 @@ class RoleForm
      * Resolve a human-readable label for a resource permission group.
      *
      * Resolution priority:
-     *   1. Package lang file (filament-modular-permissions::permissions.resources.<key>)
-     *   2. App config override (filament-modular-permissions.translations.resources.<key>)
-     *   3. Active Filament Resource class getNavigationLabel() — searched across ALL registered panels
-     *   4. Fallback: title-cased version of the permission key
+     *   1. App config override (highest priority)
+     *   2. Current Panel's resource getNavigationLabel() (avoids cross-panel conflicts)
+     *   3. Other panels' resources getNavigationLabel() (fallback)
+     *   4. Package lang file (filament-modular-permissions::permissions.resources.<key>)
+     *   5. Fallback: title-cased version of the permission key
      */
     protected static function resolveResourceLabel(string $resourceName): string
     {
@@ -158,27 +159,38 @@ class RoleForm
             return $configOverride;
         }
 
-        // 2. Search across all registered Filament panel resources and use getNavigationLabel()
+        // 2. Try current panel resources first (best for accurate local labels)
+        $currentPanel = Filament::getCurrentPanel();
+        foreach ($currentPanel->getResources() as $resourceClass) {
+            $snakeClass = Str::snake(str_replace('Resource', '', class_basename($resourceClass)));
+            if ($snakeClass === $resourceName) {
+                try {
+                    return $resourceClass::getNavigationLabel();
+                } catch (\Throwable) {}
+            }
+        }
+
+        // 3. Fallback: Search across all other registered Filament panels
         foreach (Filament::getPanels() as $panel) {
+            if ($panel->getId() === $currentPanel->getId()) continue;
+
             foreach ($panel->getResources() as $resourceClass) {
                 $snakeClass = Str::snake(str_replace('Resource', '', class_basename($resourceClass)));
                 if ($snakeClass === $resourceName) {
                     try {
                         return $resourceClass::getNavigationLabel();
-                    } catch (\Throwable) {
-                        // Silently skip if the resource throws during static call
-                    }
+                    } catch (\Throwable) {}
                 }
             }
         }
 
-        // 3. Try package lang file
+        // 4. Try package lang file
         $translated = __('filament-modular-permissions::permissions.resources.' . $resourceName);
         if ($translated !== 'filament-modular-permissions::permissions.resources.' . $resourceName) {
             return $translated;
         }
 
-        // 4. Title-case fallback
+        // 5. Title-case fallback
         return Str::title(str_replace('_', ' ', $resourceName));
     }
 

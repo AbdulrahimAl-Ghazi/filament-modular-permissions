@@ -6,7 +6,7 @@
 
 A professional Laravel package for modular roles and permissions in **Filament v5**. Supporting multi-panel, auto-syncing, and **Global Zero-Config Protection**.
 
-> **Latest Stable Version**: v1.5.4
+> **Latest Stable Version**: v1.5.5
 > **Requirements**: PHP 8.2+, Laravel 11+, Filament 5.x, spatie/laravel-permission ^6|^7
 
 ---
@@ -49,6 +49,7 @@ A professional Laravel package for modular roles and permissions in **Filament v
 - **Panel User Management**: Pre-configured PanelUserResource with role management and automatic guard-based filtering.
 - **Separated Widget Permissions**: Widget permissions appear in a dedicated section in the Role form.
 - **Dynamic Resource Labels**: Role permissions sections automatically use the resource's `getNavigationLabel()`.
+- **Multi-Panel Isolation**: Resource labels are prioritized by current panel to avoid cross-panel naming conflicts.
 
 ## Installation
 
@@ -245,7 +246,7 @@ Website: [abaad.dev](https://abaad.dev)
 <a name="التوثيق-العربي"></a>
 # التوثيق العربي
 
-> **آخر إصدار مستقر**: v1.5.4
+> **آخر إصدار مستقر**: v1.5.5
 > **المتطلبات**: PHP 8.2+، Laravel 11+، Filament 5.x، spatie/laravel-permission ^6|^7
 
 ## فهرس المحتويات
